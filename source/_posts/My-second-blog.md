@@ -5,11 +5,35 @@ tags:
 	- iOS
 	- Swift
 	- Object-v
+categories: 
+	- Test
 ---
-Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [documentation](https://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](https://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
-# second blog test
-    hello your
-## test2 hello world
-    canm omda
-### hello world
+# Markdown--从入门到精通
+####导语：
+>[Markdown](www.baidu.com)是一种轻量级的[标记语言],优点很多。
+
+##一、认识Markdown
+
+在刚才的导语里提到，Markdown是一种用来写作的轻量级[标记语言],它用简洁的语法代替排版。
+
+###Markdown官方文档
+>这里可以看到官方文档的Markdown语法规则文档，当然，后文我也会用自己的方式阐述这些语法的具体用法。
+
+*[*创始人John Gruber的Markdown语法说明*](https://zomfice.git.io)
+
+*[*Markdown中文语法说明*](https://zomfice.git.io)
+
+###使用Markdown的优点
+
+*专注
+*导出
+*纯文本
+*可读
+
+###我该用什么工具？
+![Mou icon](http://img02.tooopen.com/images/20160509/tooopen_sy_161967094653.jpg)
+<div align=center>
+<img src="http://img02.tooopen.com/images/20160509/tooopen_sy_161967094653.jpg" width="100" height="80" >
+</div>
+
 
