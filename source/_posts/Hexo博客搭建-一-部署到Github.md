@@ -7,7 +7,9 @@ categories:
 	- Hexo博客
 ---
 # Hexo搭建部署到github
+
 #### 导语
+
 > 基于hexo简洁的特点，最近花了点时间搭建了自己的博客，中间遇到些问题，也处理了一些细节。把自己的这个博客搭建过程整理出来，方便自己查看，也希望能帮到其他博客搭建者理清思路。
 
 ## Hexo
@@ -167,22 +169,24 @@ hexo d  //即hexo deploy，部署网站到Github。
 
 ## 参考
 
-[使用Hexo + Github搭建自己的私人博客](https://www.jianshu.com/p/dd9244bbc550)
+* [使用Hexo + Github搭建自己的私人博客](https://www.jianshu.com/p/dd9244bbc550)
 
-[在Github上面搭建Hexo博客（一）：部署到Github](http://mungo.space/2015/10/12/create-hexo-on-github-1/#more)
+* [在Github上面搭建Hexo博客（一）：部署到Github](http://mungo.space/2015/10/12/create-hexo-on-github-1/#more)
 
-[关于HEXO搭建个人博客的点点滴滴](https://juejin.im/post/5a6ee00ef265da3e4b770ac1)
+* [关于HEXO搭建个人博客的点点滴滴](https://juejin.im/post/5a6ee00ef265da3e4b770ac1)
 
-[Hexo 入门指南（一） - 简介 & 准备](https://wizardforcel.gitbooks.io/markdown-simple-world/hexo-tutor-2.html)
+* [Hexo 入门指南（一） - 简介 & 准备](https://wizardforcel.gitbooks.io/markdown-simple-world/hexo-tutor-2.html)
 
-[hexo你的博客](http://ibruce.info/2013/11/22/hexo-your-blog/)
+* [hexo你的博客](http://ibruce.info/2013/11/22/hexo-your-blog/)
 
-[手把手教你使用Hexo + Github Pages搭建个人独立博客](https://linghucong.js.org/2016/04/15/2016-04-15-hexo-github-pages-blog/)
+* [手把手教你使用Hexo + Github Pages搭建个人独立博客](https://linghucong.js.org/2016/04/15/2016-04-15-hexo-github-pages-blog/)
 
-[GitHub Pages + Hexo搭建博客](http://crazymilk.github.io/2015/12/28/GitHub-Pages-Hexo%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/#more)
+* [如何搭建一个独立博客——简明Github Pages与Hexo教程](https://www.jianshu.com/p/05289a4bc8b2)
 
-[Next主题](http://theme-next.iissnan.com/getting-started.html)
+* [GitHub Pages + Hexo搭建博客](http://crazymilk.github.io/2015/12/28/GitHub-Pages-Hexo%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/#more)
 
-[Hexo](https://hexo.io/docs/)
+* [Next主题](http://theme-next.iissnan.com/getting-started.html)
+
+* [Hexo](https://hexo.io/docs/)
 
 
