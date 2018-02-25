@@ -1,5 +1,5 @@
 ---
-title: Hexo博客搭建 (一):配置Github的SSH key
+title: 'Hexo博客搭建 (二):配置Github的SSH key'
 date: 2018-02-24 17:08:58
 tags:
 	- Hexo
