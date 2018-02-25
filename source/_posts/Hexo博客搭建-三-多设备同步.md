@@ -52,7 +52,9 @@ MacBook-Pro:Zomfice.github.io WZY$ git branch -v
 1. 首先进行版本回滚，回滚到[之前版本](https://ws1.sinaimg.cn/large/ad3a9ce5ly1fot5w7h6eij210q0b0n0t.jpg)
 
 2. 远程分支存在需要删除,[git怎么删除远程分支](https://segmentfault.com/q/1010000008841093)
+
 3. 本地也初始化了一个分支(注:  git checkout -b 分支名 新建分支并切换到新建的分支),删除本地分支
+
 4. [删除掉没有与远程分支对应的本地分支](https://segmentfault.com/q/1010000008841093)
 
 	查看远程分支
@@ -65,7 +67,6 @@ MacBook-Pro:Zomfice.github.io WZY$ git branch -v
 	```
 	git branch  -v
 	```
-	
 	新建并切换到新的分支
 	
 	```
