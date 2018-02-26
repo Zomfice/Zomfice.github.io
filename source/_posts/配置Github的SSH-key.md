@@ -152,6 +152,7 @@ Hi [你的用户名]! You’ve successfully authenticated, but GitHub does not p
 * [设置其他SSH密钥](https://confluence.atlassian.com/bitbucket/set-up-additional-ssh-keys-271943168.html#SetupadditionalSSHkeys-Step2.(Mercurialonly)EnableSSHcompression)
 * [使用Github SSH Key以免去Hexo部署时输入密码](https://xuanwo.org/2015/02/07/generate-a-ssh-key/)
 * [配置 SSH keys](https://www.jianshu.com/p/05289a4bc8b2)
+* [生成一个新的SSH密钥并将其添加到ssh-agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/)
 
 
 

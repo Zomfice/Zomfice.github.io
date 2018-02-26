@@ -171,6 +171,8 @@ hexo d  //即hexo deploy，部署网站到Github。
 
 * [使用Hexo + Github搭建自己的私人博客](https://www.jianshu.com/p/dd9244bbc550)
 
+* [【全民博主】20分钟教你使用hexo搭建github博客](https://www.jianshu.com/p/e99ed60390a8)
+
 * [在Github上面搭建Hexo博客（一）：部署到Github](http://mungo.space/2015/10/12/create-hexo-on-github-1/#more)
 
 * [关于HEXO搭建个人博客的点点滴滴](https://juejin.im/post/5a6ee00ef265da3e4b770ac1)
