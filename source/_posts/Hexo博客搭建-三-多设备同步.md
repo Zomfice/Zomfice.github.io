@@ -226,9 +226,9 @@ hexo d 部署hexo之后提交代码
 	hexo g -d  
 <font color=red>参考：</font>
 
-[多设备同步hexo搭建的Github博客](https://www.jianshu.com/p/6fb0b287f950)
+* [多设备同步hexo搭建的Github博客](https://www.jianshu.com/p/6fb0b287f950)
 
-[HEXO换电脑麻烦解决](http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/)
+* [HEXO换电脑麻烦解决](http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/)
 ## 三：配置完成多端同步，新设备如何配置使用
 
 ##### 1. 在新设备中安装node.js和Git
@@ -256,7 +256,7 @@ npm install -g hexo、npm install、npm install hexo-deployer-git即可将最新
 
 <font color=red>参考:</font>
 
-[hexo多设备同步与版本控制实现](http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more)
+* [hexo多设备同步与版本控制实现](http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more)
 
 
 ## 四：日常维护使用
@@ -269,11 +269,13 @@ npm install -g hexo、npm install、npm install hexo-deployer-git即可将最新
 	4. git push origin hexo
 	5. hexo g -d
 
-<font color>参考:</font>
+<font color=red>参考:</font>
 
-[HEXO换电脑麻烦解决](http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/)
+* [HEXO换电脑麻烦解决](http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/)
 
-[hexo多设备同步与版本控制实现](http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more)
+* [hexo多设备同步与版本控制实现](http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more)
+
+
 
 ## 参考
 
