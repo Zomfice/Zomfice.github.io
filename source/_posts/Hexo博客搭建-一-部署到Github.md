@@ -186,6 +186,7 @@ hexo d  //即hexo deploy，部署网站到Github。
 * [如何搭建一个独立博客——简明Github Pages与Hexo教程](https://www.jianshu.com/p/05289a4bc8b2)
 
 * [GitHub Pages + Hexo搭建博客](http://crazymilk.github.io/2015/12/28/GitHub-Pages-Hexo%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/#more)
+* [Hexo+Github搭建个人博客[两个分支方便维护]](https://haoshuai6.github.io/2016-10-28-hexo-github.html)
 
 * [Next主题](http://theme-next.iissnan.com/getting-started.html)
 

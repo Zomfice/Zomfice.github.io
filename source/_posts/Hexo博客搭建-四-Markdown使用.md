@@ -70,10 +70,10 @@ categories:
 
 ## 7.代码框
 
+	````
+	代码 (多加`为了显示效果)  
 	```
-	代码   
-	```
-	`高亮`
+	``高亮`
 	
 [MarkDown语法中代码怎么换行？](http://www.meeko.tech/article/10)
 
