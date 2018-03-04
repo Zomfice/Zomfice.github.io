@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo,SSH," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="配置Github的SSH Key什么是SSH 很多朋友在用github管理项目的时候，都是直接使用https url克隆到本地，当然也有有些人使用 SSH url 克隆到本地。然而，为什么绝大多数人会使用https url克隆呢？   这是因为，使用https url克隆对初学者来说会比较方便，复制https url 然后到 git Bash 里面直接用clone命令克隆到本地就好了。而使用 SS">
+<meta name="keywords" content="Hexo,SSH">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo博客搭建 (二):配置Github的SSH key">
+<meta property="og:url" content="http://yoursite.com/2018/02/24/配置Github的SSH-key/index.html">
+<meta property="og:site_name" content="Zomfice’s blog">
+<meta property="og:description" content="配置Github的SSH Key什么是SSH 很多朋友在用github管理项目的时候，都是直接使用https url克隆到本地，当然也有有些人使用 SSH url 克隆到本地。然而，为什么绝大多数人会使用https url克隆呢？   这是因为，使用https url克隆对初学者来说会比较方便，复制https url 然后到 git Bash 里面直接用clone命令克隆到本地就好了。而使用 SS">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-04T04:51:31.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo博客搭建 (二):配置Github的SSH key">
+<meta name="twitter:description" content="配置Github的SSH Key什么是SSH 很多朋友在用github管理项目的时候，都是直接使用https url克隆到本地，当然也有有些人使用 SSH url 克隆到本地。然而，为什么绝大多数人会使用https url克隆呢？   这是因为，使用https url克隆对初学者来说会比较方便，复制https url 然后到 git Bash 里面直接用clone命令克隆到本地就好了。而使用 SS">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/02/24/配置Github的SSH-key/"/>
+
+
+
+
+
+  <title>Hexo博客搭建 (二):配置Github的SSH key | Zomfice’s blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zomfice’s blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/24/配置Github的SSH-key/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zomfice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zomfice’s blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hexo博客搭建 (二):配置Github的SSH key</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-24T17:08:58+08:00">
+                2018-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hexo博客/" itemprop="url" rel="index">
+                    <span itemprop="name">Hexo博客</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="配置Github的SSH-Key"><a href="#配置Github的SSH-Key" class="headerlink" title="配置Github的SSH Key"></a>配置Github的SSH Key</h1><h2 id="什么是SSH"><a href="#什么是SSH" class="headerlink" title="什么是SSH"></a>什么是SSH</h2><blockquote>
+<p>很多朋友在用github管理项目的时候，都是直接使用https url克隆到本地，当然也有有些人使用 SSH url 克隆到本地。然而，为什么绝大多数人会使用https url克隆呢？</p>
+</blockquote>
+<blockquote>
+<p>这是因为，使用https url克隆对初学者来说会比较方便，复制https url 然后到 git Bash 里面直接用clone命令克隆到本地就好了。而使用 SSH url 克隆却需要在克隆之前先配置和添加好 SSH key 。</p>
+</blockquote>
+<blockquote>
+<p>因此，如果你想要使用 SSH url 克隆的话，你必须是这个项目的拥有者。否则你是无法添加 SSH key 的。</p>
+</blockquote>
+<p>生成<font color="red">多个公钥</font>请点击<a href="http://www.cnblogs.com/ayseeing/p/4445194.html" target="_blank" rel="noopener">http://www.cnblogs.com/ayseeing/p/4445194.html</a></p>
+<h2 id="https-和-SSH-的区别："><a href="#https-和-SSH-的区别：" class="headerlink" title="https 和 SSH 的区别："></a>https 和 SSH 的区别：</h2><p>1、前者可以随意克隆github上的项目，而不管是谁的；而后者则是你必须是你要克隆的项目的拥有者或管理员，且需要先添加 SSH key ，否则无法克隆。</p>
+<p>2、https url 在push的时候是需要验证用户名和密码的；而 SSH 在push的时候，是不需要输入用户名的，如果配置SSH key的时候设置了密码，则需要输入密码的，否则直接是不需要输入密码的。</p>
+<h2 id="如何配置Github的SSH"><a href="#如何配置Github的SSH" class="headerlink" title="如何配置Github的SSH"></a>如何配置Github的SSH</h2><h3 id="Step-1-检查SSH-Keys"><a href="#Step-1-检查SSH-Keys" class="headerlink" title="Step 1:检查SSH Keys"></a>Step 1:检查SSH Keys</h3><p>首先，我们要查看在你电脑上已经存在的SSH keys。运行Git Bash 然后输入：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ls -al ~/.ssh</span><br></pre></td></tr></table></figure>
+<p>这两个命令就是检查是否已经存在 id_rsa.pub 或 id_dsa.pub 文件，如果文件已经存在，那么你可以跳过步骤2，直接进入步骤3。</p>
+<h3 id="Step-2-生成SSH-key"><a href="#Step-2-生成SSH-key" class="headerlink" title="Step 2:生成SSH key"></a>Step 2:生成SSH key</h3><h4 id="1-在Git-Bash中输入下面命令，引号内一定是你的Github注册邮箱地址"><a href="#1-在Git-Bash中输入下面命令，引号内一定是你的Github注册邮箱地址" class="headerlink" title="1. 在Git Bash中输入下面命令，引号内一定是你的Github注册邮箱地址"></a>1. 在Git Bash中输入下面命令，引号内一定是你的Github注册邮箱地址</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ssh-keygen -t rsa -b 4096 -C &quot;your_github_email@example.com&quot; </span><br><span class="line">#这句作用是生成一个新的SSH key</span><br></pre></td></tr></table></figure>
+<h4 id="2-等待几秒，当提示让你输入保存地址时，官方特别推荐放在默认位置就可以了。所以这里直接输入回车，提示如下："><a href="#2-等待几秒，当提示让你输入保存地址时，官方特别推荐放在默认位置就可以了。所以这里直接输入回车，提示如下：" class="headerlink" title="2. 等待几秒，当提示让你输入保存地址时，官方特别推荐放在默认位置就可以了。所以这里直接输入回车，提示如下："></a>2. 等待几秒，当提示让你输入保存地址时，官方特别推荐放在默认位置就可以了。所以这里直接输入回车，提示如下：</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Enter file in which to save the key (/Users/you/.ssh/id_rsa):[直接输入回车]</span><br></pre></td></tr></table></figure>
+<h4 id="3-将会提示你输入一个密码串-这里输入密码时不会显示在屏幕上的，只要输入正确按回车就好"><a href="#3-将会提示你输入一个密码串-这里输入密码时不会显示在屏幕上的，只要输入正确按回车就好" class="headerlink" title="3. 将会提示你输入一个密码串(这里输入密码时不会显示在屏幕上的，只要输入正确按回车就好):"></a>3. 将会提示你输入一个密码串(这里输入密码时不会显示在屏幕上的，只要输入正确按回车就好):</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Enter passphrase （empty for no passphrase）: [输入你想设置的密码]</span><br><span class="line">Enter same passphrase again：[在输入一遍密码]</span><br><span class="line">＃虽然说这里可以设置为空，但是推荐用一个更加安全的密码</span><br></pre></td></tr></table></figure>
+<h4 id="4-输完密码之后，你将会得到你的SSH的print或者id。"><a href="#4-输完密码之后，你将会得到你的SSH的print或者id。" class="headerlink" title="4. 输完密码之后，你将会得到你的SSH的print或者id。"></a>4. 输完密码之后，你将会得到你的SSH的<a href="https://ws1.sinaimg.cn/large/ad3a9ce5gy1foroi8j00ej217s0oojxi.jpg" target="_blank" rel="noopener">print</a>或者id。</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Your identification has been saved in /c/Users/you/.ssh/id_rsa.</span><br><span class="line"># Your public key has been saved in /c/Users/you/.ssh/id_rsa.pub.</span><br><span class="line"># The key fingerprint is:</span><br><span class="line"># 01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@example.com</span><br></pre></td></tr></table></figure>
+<p>当你看到上面这段代码的收，那就说明，你的 SSH key 已经创建成功，你只需要添加到github的SSH key上就可以了。</p>
+<h3 id="Step-3-添加SSH-key到ssh-agent"><a href="#Step-3-添加SSH-key到ssh-agent" class="headerlink" title="Step 3:添加SSH key到ssh-agent"></a>Step 3:添加SSH key到ssh-agent</h3><h4 id="1-输入如下命令"><a href="#1-输入如下命令" class="headerlink" title="1.输入如下命令"></a>1.输入如下命令</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ssh-agent -s</span><br></pre></td></tr></table></figure>
+<p>会响应:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">echo Agent pid [端口号]</span><br></pre></td></tr></table></figure>
+<h4 id="2-把SSH-key添加到ssh-agent"><a href="#2-把SSH-key添加到ssh-agent" class="headerlink" title="2.把SSH key添加到ssh-agent"></a>2.把SSH key添加到ssh-agent</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+<p>如果他提示如下，说明不能打开您身份验证的代理</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Could not open a connection to your authentication agent.</span><br></pre></td></tr></table></figure>
+<p>只需要输入如下命令即可解决：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh-agnet bash</span><br></pre></td></tr></table></figure>
+<p>更多关于ssh-agent的细节，可以用man ssh-agent 来查看</p>
+<h3 id="Step-4-添加SSH-key到Github账户"><a href="#Step-4-添加SSH-key到Github账户" class="headerlink" title="Step 4:添加SSH key到Github账户"></a>Step 4:添加SSH key到Github账户</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ clip &lt; ~/.ssh/id_ras.pub</span><br></pre></td></tr></table></figure>
+<p>添加到你的Github账户：</p>
+<h4 id="1-浏览器登陆你的Github账户，点击右上角你的头像，然后点击Settings"><a href="#1-浏览器登陆你的Github账户，点击右上角你的头像，然后点击Settings" class="headerlink" title="1. 浏览器登陆你的Github账户，点击右上角你的头像，然后点击Settings"></a>1. 浏览器登陆你的Github账户，点击右上角你的头像，然后点击Settings</h4><p><a href="http://ww4.sinaimg.cn/large/8ac969edjw1f1zt9l88fjj20di0ki0u0.jpg" target="_blank" rel="noopener">点击Setting</a></p>
+<h4 id="2-进入Settings，点击侧栏选项SSH-key"><a href="#2-进入Settings，点击侧栏选项SSH-key" class="headerlink" title="2.进入Settings，点击侧栏选项SSH key"></a>2.进入Settings，点击侧栏选项SSH key</h4><p><a href="http://ww4.sinaimg.cn/mw690/8ac969edjw1f1zt9lca00j20fs0qsmyx.jpg" target="_blank" rel="noopener">点击SSH key</a></p>
+<h4 id="3-单击右边-Add-SSH-key-按钮"><a href="#3-单击右边-Add-SSH-key-按钮" class="headerlink" title="3.单击右边 Add SSH key 按钮"></a>3.单击右边 Add SSH key 按钮</h4><p><a href="http://ww3.sinaimg.cn/mw690/8ac969edjw1f1zt9m4k6tj20wm05cta4.jpg" target="_blank" rel="noopener">点击Add key</a></p>
+<h4 id="4-在下面输入标题（Title，这个可以自定义）和SHH-Key（直接-Ctrl＋V-粘贴就可以）"><a href="#4-在下面输入标题（Title，这个可以自定义）和SHH-Key（直接-Ctrl＋V-粘贴就可以）" class="headerlink" title="4. 在下面输入标题（Title，这个可以自定义）和SHH Key（直接 Ctrl＋V 粘贴就可以）"></a>4. 在下面输入标题（Title，这个可以自定义）和SHH Key（直接 Ctrl＋V 粘贴就可以）</h4><h4 id="5-点击下面的Add-key按钮便可以添加成功了"><a href="#5-点击下面的Add-key按钮便可以添加成功了" class="headerlink" title="5. 点击下面的Add key按钮便可以添加成功了"></a>5. 点击下面的Add key按钮便可以添加成功了</h4><h3 id="Step-5-测试是否连接成功"><a href="#Step-5-测试是否连接成功" class="headerlink" title="Step 5:测试是否连接成功"></a>Step 5:测试是否连接成功</h3><h4 id="1-在Git-Bash中输入："><a href="#1-在Git-Bash中输入：" class="headerlink" title="1. 在Git Bash中输入："></a>1. 在Git Bash中输入：</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line"># ssh尝试连接到GitHub</span><br></pre></td></tr></table></figure>
+<h4 id="2-你可能看到下面的警告："><a href="#2-你可能看到下面的警告：" class="headerlink" title="2.你可能看到下面的警告："></a>2.你可能看到下面的警告：</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">The authenticity of host &apos;github.com(207.97.227.239)&apos; can&apos;t be established.</span><br><span class="line">RSA key fingerprint is SHA256:nJKJFKDnDLFJDndndnfkdfldjfldldfjld.</span><br><span class="line">Are you sure you want to continue connecting (yes/no)?</span><br></pre></td></tr></table></figure>
+<p>确定提示信息里的指纹（fingerprint）是否匹配，如果匹配就键入｀yes｀，将得到：</p>
+<p>Hi [你的用户名]! You’ve successfully authenticated, but GitHub does not provide shell access.</p>
+<h4 id="3-如果提示信息中你的用户名是你的，那么你就成功建立了SSH-key！"><a href="#3-如果提示信息中你的用户名是你的，那么你就成功建立了SSH-key！" class="headerlink" title="3. 如果提示信息中你的用户名是你的，那么你就成功建立了SSH key！"></a>3. 如果提示信息中你的用户名是你的，那么你就成功建立了SSH key！</h4><h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="http://mungo.space/2015/10/13/how-to-config-ssh-on-github/index.html" target="_blank" rel="noopener">如何配置Github的SSH key</a></li>
+<li><a href="https://www.cnblogs.com/ayseeing/p/3572582.html" target="_blank" rel="noopener">github设置添加SSH</a></li>
+<li><a href="https://confluence.atlassian.com/bitbucket/set-up-additional-ssh-keys-271943168.html#SetupadditionalSSHkeys-Step2.(Mercurialonly" target="_blank" rel="noopener">设置其他SSH密钥</a>EnableSSHcompression)</li>
+<li><a href="https://xuanwo.org/2015/02/07/generate-a-ssh-key/" target="_blank" rel="noopener">使用Github SSH Key以免去Hexo部署时输入密码</a></li>
+<li><a href="https://www.jianshu.com/p/05289a4bc8b2" target="_blank" rel="noopener">配置 SSH keys</a></li>
+<li><a href="https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/" target="_blank" rel="noopener">生成一个新的SSH密钥并将其添加到ssh-agent</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          
+            <a href="/tags/SSH/" rel="tag"># SSH</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/24/Hexo博客搭建-一-部署到Github/" rel="next" title="Hexo博客搭建 (一):部署到Github">
+                <i class="fa fa-chevron-left"></i> Hexo博客搭建 (一):部署到Github
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/25/Hexo博客搭建-三-多设备同步/" rel="prev" title="Hexo博客搭建(三):多设备同步">
+                Hexo博客搭建(三):多设备同步 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zomfice</p>
+              <p class="site-description motion-element" itemprop="description">巧笑倩兮,美目盼兮</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#配置Github的SSH-Key"><span class="nav-number">1.</span> <span class="nav-text">配置Github的SSH Key</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是SSH"><span class="nav-number">1.1.</span> <span class="nav-text">什么是SSH</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#https-和-SSH-的区别："><span class="nav-number">1.2.</span> <span class="nav-text">https 和 SSH 的区别：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何配置Github的SSH"><span class="nav-number">1.3.</span> <span class="nav-text">如何配置Github的SSH</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-1-检查SSH-Keys"><span class="nav-number">1.3.1.</span> <span class="nav-text">Step 1:检查SSH Keys</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-2-生成SSH-key"><span class="nav-number">1.3.2.</span> <span class="nav-text">Step 2:生成SSH key</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-在Git-Bash中输入下面命令，引号内一定是你的Github注册邮箱地址"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">1. 在Git Bash中输入下面命令，引号内一定是你的Github注册邮箱地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-等待几秒，当提示让你输入保存地址时，官方特别推荐放在默认位置就可以了。所以这里直接输入回车，提示如下："><span class="nav-number">1.3.2.2.</span> <span class="nav-text">2. 等待几秒，当提示让你输入保存地址时，官方特别推荐放在默认位置就可以了。所以这里直接输入回车，提示如下：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-将会提示你输入一个密码串-这里输入密码时不会显示在屏幕上的，只要输入正确按回车就好"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">3. 将会提示你输入一个密码串(这里输入密码时不会显示在屏幕上的，只要输入正确按回车就好):</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-输完密码之后，你将会得到你的SSH的print或者id。"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">4. 输完密码之后，你将会得到你的SSH的print或者id。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-3-添加SSH-key到ssh-agent"><span class="nav-number">1.3.3.</span> <span class="nav-text">Step 3:添加SSH key到ssh-agent</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-输入如下命令"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">1.输入如下命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-把SSH-key添加到ssh-agent"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">2.把SSH key添加到ssh-agent</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-4-添加SSH-key到Github账户"><span class="nav-number">1.3.4.</span> <span class="nav-text">Step 4:添加SSH key到Github账户</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-浏览器登陆你的Github账户，点击右上角你的头像，然后点击Settings"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">1. 浏览器登陆你的Github账户，点击右上角你的头像，然后点击Settings</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-进入Settings，点击侧栏选项SSH-key"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">2.进入Settings，点击侧栏选项SSH key</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-单击右边-Add-SSH-key-按钮"><span class="nav-number">1.3.4.3.</span> <span class="nav-text">3.单击右边 Add SSH key 按钮</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-在下面输入标题（Title，这个可以自定义）和SHH-Key（直接-Ctrl＋V-粘贴就可以）"><span class="nav-number">1.3.4.4.</span> <span class="nav-text">4. 在下面输入标题（Title，这个可以自定义）和SHH Key（直接 Ctrl＋V 粘贴就可以）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-点击下面的Add-key按钮便可以添加成功了"><span class="nav-number">1.3.4.5.</span> <span class="nav-text">5. 点击下面的Add key按钮便可以添加成功了</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-5-测试是否连接成功"><span class="nav-number">1.3.5.</span> <span class="nav-text">Step 5:测试是否连接成功</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-在Git-Bash中输入："><span class="nav-number">1.3.5.1.</span> <span class="nav-text">1. 在Git Bash中输入：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-你可能看到下面的警告："><span class="nav-number">1.3.5.2.</span> <span class="nav-text">2.你可能看到下面的警告：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-如果提示信息中你的用户名是你的，那么你就成功建立了SSH-key！"><span class="nav-number">1.3.5.3.</span> <span class="nav-text">3. 如果提示信息中你的用户名是你的，那么你就成功建立了SSH key！</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">1.3.6.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zomfice</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
