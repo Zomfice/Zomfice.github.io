@@ -17,6 +17,7 @@ categories:
 	git add . 				//注意最后的 . ,这个表示当前目录
 	git commit -m "....."	//本地commit
 	git push origin hexo   	//提交网站相关文件
+	git pull origin hexo	//拉取分支
 	hexo g -d 				//执行生成网站并部署到GitHub上
 
 ##### 2. 其他可能用到命令
