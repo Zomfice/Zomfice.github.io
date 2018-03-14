@@ -123,7 +123,7 @@ $ clip < ~/.ssh/id_ras.pub
 
 #### 5. 点击下面的Add key按钮便可以添加成功了
 
-### Step 6:查看Mac下存在的id_ras.pub/id_rsa
+### Step 5:查看Mac下存在的id_ras.pub/id_rsa
 
 ![查看ssh位置](https://ws1.sinaimg.cn/large/ad3a9ce5gy1fpcn9c7m47j20ny08475b.jpg)
 
@@ -132,7 +132,7 @@ $ clip < ~/.ssh/id_ras.pub
 
 ```
 
-### Step 5:测试是否连接成功
+### Step 6:测试是否连接成功
 
 #### 1. 在Git Bash中输入：
 
