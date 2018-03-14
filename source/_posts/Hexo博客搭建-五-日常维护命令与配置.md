@@ -23,7 +23,7 @@ categories:
 ##### 2. 其他可能用到命令
 
 	git branch hexo   		//创建hexo分支
-	git chechout hexo   	//转换到hexo分支
+	git checkout hexo   	//转换到hexo分支
 	rm -rf *   				//删除所有文件，隐藏文件不会删除
 	git status
  
