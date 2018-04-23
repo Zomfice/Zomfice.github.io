@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="bridge,bridge_transfer," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Objective-C和Core Foundation 对象相互转换的内存管理总结iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力： [cpp] view plaincopyprint? 01. CFStringRef aCFString = (CFStringRef)aNSStr">
+<meta name="keywords" content="bridge,bridge_transfer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="__bridge，__bridge_transfer和__bridge_retained详解">
+<meta property="og:url" content="http://yoursite.com/2018/04/23/bridge，-bridge-transfer和-bridge-retained详解/index.html">
+<meta property="og:site_name" content="Zomfice’s blog">
+<meta property="og:description" content="Objective-C和Core Foundation 对象相互转换的内存管理总结iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力： [cpp] view plaincopyprint? 01. CFStringRef aCFString = (CFStringRef)aNSStr">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-04-23T09:21:23.024Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="__bridge，__bridge_transfer和__bridge_retained详解">
+<meta name="twitter:description" content="Objective-C和Core Foundation 对象相互转换的内存管理总结iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力： [cpp] view plaincopyprint? 01. CFStringRef aCFString = (CFStringRef)aNSStr">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/23/bridge，-bridge-transfer和-bridge-retained详解/"/>
+
+
+
+
+
+  <title>__bridge，__bridge_transfer和__bridge_retained详解 | Zomfice’s blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zomfice’s blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/23/bridge，-bridge-transfer和-bridge-retained详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zomfice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zomfice’s blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">__bridge，__bridge_transfer和__bridge_retained详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-23T17:17:48+08:00">
+                2018-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OC/" itemprop="url" rel="index">
+                    <span itemprop="name">OC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Objective-C和Core-Foundation-对象相互转换的内存管理总结"><a href="#Objective-C和Core-Foundation-对象相互转换的内存管理总结" class="headerlink" title="Objective-C和Core Foundation 对象相互转换的内存管理总结"></a><a href="http://www.cnblogs.com/HypeCheng/p/4686503.html" target="_blank" rel="noopener">Objective-C和Core Foundation 对象相互转换的内存管理总结</a></h3><p>iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力： [cpp] view plaincopyprint? 01. CFStringRef aCFString = (CFStringRef)aNSString; 02. NSString *aNSS</p>
+<p>iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. CFStringRef aCFString = (CFStringRef)aNSString;  </span><br><span class="line">02. NSString *aNSString = (NSString *)aCFString;</span><br></pre></td></tr></table></figure>
+<p>针对内存管理问题，ARC 可以帮忙管理 Objective-C 对象, 但是不支持 Core Foundation 对象的管理，所以转换后要注意一个问题：谁来释放使用后的对象。 本文重点总结一下类型转换后的内存管理。</p>
+<h5 id="一、非ARC的内存管理"><a href="#一、非ARC的内存管理" class="headerlink" title="一、非ARC的内存管理"></a>一、非ARC的内存管理</h5><p>倘若不使用ARC，手动管理内存，思路比较清晰，使用完，release转换后的对象即可。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. //NSString 转 CFStringRef   </span><br><span class="line">02. CFStringRef aCFString = (CFStringRef) [[NSString alloc] initWithFormat:@&quot;%@&quot;, string];  </span><br><span class="line">03. //...   </span><br><span class="line">04. CFRelease(aCFString);  </span><br><span class="line">05.  </span><br><span class="line">06.  </span><br><span class="line">07. //CFStringRef 转 NSString   </span><br><span class="line">08. CFStringRef aCFString = CFStringCreateWithCString(kCFAllocatorDefault,  </span><br><span class="line">09.                                                  bytes,  </span><br><span class="line">10.                                                  NSUTF8StringEncoding);  </span><br><span class="line">11. NSString *aNSString = (NSString *)aCFString;  </span><br><span class="line">12. //...   </span><br><span class="line">13. [aNSString release];</span><br></pre></td></tr></table></figure>
+<h5 id="二、ARC下的内存管理"><a href="#二、ARC下的内存管理" class="headerlink" title="二、ARC下的内存管理"></a>二、ARC下的内存管理</h5><p>ARC的诞生大大简化了我们针对内存管理的开发工作，但是只支持管理 Objective-C 对象, 不支持 Core Foundation 对象。Core Foundation 对象必须使用CFRetain和CFRelease来进行内存管理。那么当使用Objective-C 和 Core Foundation 对象相互转换的时候，必须让编译器知道，到底由谁来负责释放对象，是否交给ARC处理。只有正确的处理，才能避免内存泄漏和double free导致程序崩溃。</p>
+<p>根据不同需求，有3种转换方式</p>
+<ul>
+<li>__bridge                                           （不改变对象所有权）</li>
+<li>__bridge_retained 或者 CFBridgingRetain()           （解除 ARC 所有权）</li>
+<li>__bridge_transfer 或者 CFBridgingRelease()          （给予 ARC 所有权） </li>
+</ul>
+<p><strong>1. __bridge_retained 或者 CFBridgingRetain()</strong></p>
+<p>__bridge_retained 或者 CFBridgingRetain()  将Objective-C对象转换为Core Foundation对象，把对象所有权桥接给Core Foundation对象，同时剥夺ARC的管理权，后续需要开发者使用CFRelease或者相关方法手动来释放对象。</p>
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02. &#123;  </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     NSString *aNSString = [[NSString alloc]initWithFormat:@&quot;test&quot;];  </span><br><span class="line">06.     CFStringRef aCFString = (__bridge_retained CFStringRef) aNSString;  </span><br><span class="line">07.      </span><br><span class="line">08.     (void)aCFString;  </span><br><span class="line">09.      </span><br><span class="line">10.     //正确的做法应该执行CFRelease   </span><br><span class="line">11.     //CFRelease(aCFString);    </span><br><span class="line">12.&#125;</span><br></pre></td></tr></table></figure>
+<p>程序没有执行CFRelease，造成内存泄漏：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CFBridgingRetain()  是 __bridge_retained 的宏方法，下面两行代码等价：</span><br><span class="line"></span><br><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. CFStringRef aCFString = (__bridge_retained CFStringRef) aNSString;  </span><br><span class="line">02. CFStringRef aCFString = (CFStringRef) CFBridgingRetain(aNSString);</span><br></pre></td></tr></table></figure>
+<p><strong>2. __bridge_transfer 或者 CFBridgingRelease()</strong></p>
+<p>__bridge_transfer 或者 CFBridgingRelease()  将非Objective-C对象转换为Objective-C对象，同时将对象的管理权交给ARC，开发者无需手动管理内存。</p>
+<p>接着上面那个内存泄漏的例子，再转成OC对象交给ARC来管理内存，无需手动管理，也不会出现内存泄漏：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02. &#123;  </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     NSString *aNSString = [[NSString alloc]initWithFormat:@&quot;test&quot;];  </span><br><span class="line">06.     CFStringRef aCFString = (__bridge_retained CFStringRef) aNSString;  </span><br><span class="line">07.     aNSString = (__bridge_transfer NSString *)aCFString;  </span><br><span class="line">08. &#125;</span><br></pre></td></tr></table></figure>
+<p>CFBridgingRelease() 是__bridge_transfer的宏方法，下面两行代码等价：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. aNSString = (__bridge_transfer NSString *)aCFString;  </span><br><span class="line">02. aNSString = (NSString *)CFBridgingRelease(aCFString);</span><br></pre></td></tr></table></figure>
+<p><strong>3. __bridge</strong></p>
+<p>__bridge 只做类型转换，不改变对象所有权，是我们最常用的转换符。</p>
+<p>从OC转CF，ARC管理内存：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02. &#123;  </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     NSString *aNSString = [[NSString alloc]initWithFormat:@&quot;test&quot;];  </span><br><span class="line">06.     CFStringRef aCFString = (__bridge CFStringRef)aNSString;  </span><br><span class="line">07.      </span><br><span class="line">08.     (void)aCFString;  </span><br><span class="line">09. &#125;</span><br></pre></td></tr></table></figure>
+<p>从CF转OC，需要开发者手动释放，不归ARC管：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02.   </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     CFStringRef aCFString = CFStringCreateWithCString(NULL, &quot;test&quot;, kCFStringEncodingASCII);  </span><br><span class="line">06.     NSString *aNSString = (__bridge NSString *)aCFString;  </span><br><span class="line">07.      </span><br><span class="line">08.     (void)aNSString;  </span><br><span class="line">09.      </span><br><span class="line">10.     CFRelease(aCFString);  </span><br><span class="line">11. &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考:"></a>参考:</h4><ul>
+<li><a href="http://www.cnblogs.com/HypeCheng/p/4686503.html" target="_blank" rel="noopener">Objective-C和Core Foundation 对象相互转换的内存管理总结</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/bridge/" rel="tag"># bridge</a>
+          
+            <a href="/tags/bridge-transfer/" rel="tag"># bridge_transfer</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/04/C-语言中结构体的定义和使用/" rel="next" title="C 语言中结构体的定义和使用">
+                <i class="fa fa-chevron-left"></i> C 语言中结构体的定义和使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zomfice</p>
+              <p class="site-description motion-element" itemprop="description">巧笑倩兮,美目盼兮</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Objective-C和Core-Foundation-对象相互转换的内存管理总结"><span class="nav-number">1.</span> <span class="nav-text">Objective-C和Core Foundation 对象相互转换的内存管理总结</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一、非ARC的内存管理"><span class="nav-number">1.0.1.</span> <span class="nav-text">一、非ARC的内存管理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#二、ARC下的内存管理"><span class="nav-number">1.0.2.</span> <span class="nav-text">二、ARC下的内存管理</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考"><span class="nav-number">1.1.</span> <span class="nav-text">参考:</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zomfice</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
