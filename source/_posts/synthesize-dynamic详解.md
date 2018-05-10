@@ -20,7 +20,7 @@ categories:
 
 从Xcode4.4以后@property已经独揽了@synthesize的功能主要有三个作用：
 
-### @synthesize三个作用：
+### ·@synthesize三个作用：
 
 1. 生成了成员变量get/set方法的声明
 2. 生成了私有的带下划线的的成员变量因此子类不可以直接访问，但是可以通过. get/set方法访问。那么如果想让定义的成员变量让子类直接访问那么只能在.h文件. 中. 定义成员变量了，因为它默认是@protected
@@ -31,7 +31,7 @@ categories:
 总结：一定要分清属性和变量的区别，不能混淆。@synthesize 声明的属性=变量。意思是，将属性的setter,getter方法，作用于这个变量。
 
 
-### [@synthesize：自动合成](https://www.jianshu.com/p/294e9285361e)
+### [·@synthesize：自动合成](https://www.jianshu.com/p/294e9285361e)
 
 * 自动合成 getter, setter：注意名字编译器会自动检查，如果没有手动实现，会自动添加 getter，setter，如果实现了，则不做处理
 * 具体合成那些其实还和 ready write 相关修饰符相关的，默认为 readwrite
@@ -49,7 +49,7 @@ categories:
 * 在 category 中定义的所有属性
 * 重载的属性
 
-### [@dynamic：禁止自动合成](https://www.jianshu.com/p/294e9285361e)
+### [·@dynamic：禁止自动合成](https://www.jianshu.com/p/294e9285361e)
 
 * 禁止自动合成getter, setter：告诉编译器属性的 setter 与 getter 方法由用户自己实现，不自动生成。（当然对于 readonly 的属性只需提供 getter 即可）
 
