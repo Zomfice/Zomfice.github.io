@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="property,Instance ivars,成员变量," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1. 概念与区别： 成员变量：@interface的{}中包裹的变量   @interface xx(){“成员变量”} -&amp;gt; { }包裹的是成员变量—基本数据类型(int/float)+实例变量(NSString)实例变量+基本数据类型变量=成员变量   属性变量：声明标识符,对set/get方法声明,并不是变量   属性并不是变量,是Objective-C 的一项特性,是属性的声明标识符">
+<meta name="keywords" content="property,Instance ivars,成员变量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="成员变量 实例变量 属性变量">
+<meta property="og:url" content="http://yoursite.com/2018/05/10/成员变量-实例变量-属性变量/index.html">
+<meta property="og:site_name" content="Zomfice’s blog">
+<meta property="og:description" content="1. 概念与区别： 成员变量：@interface的{}中包裹的变量   @interface xx(){“成员变量”} -&amp;gt; { }包裹的是成员变量—基本数据类型(int/float)+实例变量(NSString)实例变量+基本数据类型变量=成员变量   属性变量：声明标识符,对set/get方法声明,并不是变量   属性并不是变量,是Objective-C 的一项特性,是属性的声明标识符">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-10T12:26:55.458Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="成员变量 实例变量 属性变量">
+<meta name="twitter:description" content="1. 概念与区别： 成员变量：@interface的{}中包裹的变量   @interface xx(){“成员变量”} -&amp;gt; { }包裹的是成员变量—基本数据类型(int/float)+实例变量(NSString)实例变量+基本数据类型变量=成员变量   属性变量：声明标识符,对set/get方法声明,并不是变量   属性并不是变量,是Objective-C 的一项特性,是属性的声明标识符">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/10/成员变量-实例变量-属性变量/"/>
+
+
+
+
+
+  <title>成员变量 实例变量 属性变量 | Zomfice’s blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zomfice’s blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/10/成员变量-实例变量-属性变量/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zomfice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zomfice’s blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">成员变量 实例变量 属性变量</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-10T17:30:15+08:00">
+                2018-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OC/" itemprop="url" rel="index">
+                    <span itemprop="name">OC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-概念与区别："><a href="#1-概念与区别：" class="headerlink" title="1. 概念与区别："></a>1. 概念与区别：</h3><ul>
+<li>成员变量：@interface的{}中包裹的变量</li>
+</ul>
+<blockquote>
+<p>@interface xx(){“成员变量”} -&gt; { }包裹的是成员变量—基本数据类型(int/float)+实例变量(NSString)<br><br><strong>实例变量+基本数据类型变量=成员变量</strong></p>
+</blockquote>
+<ul>
+<li>属性变量：声明标识符,对set/get方法声明,并不是变量</li>
+</ul>
+<blockquote>
+<p>属性并不是变量,是Objective-C 的一项特性,是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境,主要的作用就在于封装对象中的数据,Objective-C 对象通常会把其所需要的数据保存为各种实例变量,实例变量一般通过“存取方法”(access method)来访问。<a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">@property 本质</a></p>
+</blockquote>
+<ul>
+<li>实例变量：成员变量的一种</li>
+</ul>
+<blockquote>
+<p>成员变量一种，不包含基本数据类型，@synthesize name = _name , _name实例变量。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@interface MM ()&#123;</span><br><span class="line">    int _age;//成员变量</span><br><span class="line">    NSString * _name;//成员变量</span><br><span class="line">&#125;</span><br><span class="line">@property (nonatomic,assign) int age;//属性,set/get方法声明,标识符 nonatomic:权限</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation MM</span><br><span class="line">@synthesize age = _age;//生成实例变量_age,生成set/get方法,并将set/get方法作用于实例变量</span><br><span class="line"></span><br><span class="line">- (void)setAge:(int)age&#123;//对_age的封装,便于子类和外部访问，同时设置访问权限等</span><br><span class="line">    _age = age;</span><br><span class="line">&#125;</span><br><span class="line">- (int)age&#123;</span><br><span class="line">    return _age;</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<h3 id="2-历史和关系："><a href="#2-历史和关系：" class="headerlink" title="2. 历史和关系："></a>2. 历史和关系：</h3><p><a href="https://www.jianshu.com/p/8e6606ce759d" target="_blank" rel="noopener">详情参考:IOS属性的作用</a></p>
+<h5 id="GCC"><a href="#GCC" class="headerlink" title="GCC"></a>GCC</h5><p><strong>手动声明实例变量</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">***.h***</span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">&#123;</span><br><span class="line">    //属性的实例变量</span><br><span class="line">    NSString *myTitle;</span><br><span class="line">&#125;</span><br><span class="line">//编译器遇到@property会自动声明对应的setter/getter</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">***.m***</span><br><span class="line">//编译器遇到@synthesize会自动实现setter/getter方法</span><br><span class="line">//编译器遇到@synthesize回去访问myTitle的同名变量，如果没找到就报错。</span><br><span class="line">@synthesize myTitle;</span><br></pre></td></tr></table></figure>
+<h5 id="LLVM"><a href="#LLVM" class="headerlink" title="LLVM"></a>LLVM</h5><p><strong>编译器就可以自动为属性生成一个名字带下划线的实例变量</strong></p>
+<p>属性改变步骤：</p>
+<ol>
+<li>第一版,最早版本</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">***.h***</span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">&#123;</span><br><span class="line">    NSString *myTitle;</span><br><span class="line">&#125;</span><br><span class="line">//编译器遇到@property会自动声明对应的setter/getter</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">***.m***</span><br><span class="line">//编译器遇到@synthesize会自动实现setter/getter方法</span><br><span class="line">//编译器遇到@synthesize回去访问myTitle的同名变量，如果没找到就报错。</span><br><span class="line">@synthesize myTitle;</span><br></pre></td></tr></table></figure>
+<p>2.第二版，不需要自己手动声明一个成员变量，关键字@synthesize会默认去访问myTitle的同名变量，如果找不到则会自动生成一个</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">***.h***</span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">***.m***</span><br><span class="line">/*</span><br><span class="line"> 1.编译器遇到@synthesize会自动实现setter/getter方法;</span><br><span class="line"> 2.编译器遇到@synthesize回去访问myTitle的同名变量;</span><br><span class="line"> 3.如果找不到同名的变量，会自动生成一个私有同名变量myTitle</span><br><span class="line"> 4.因此现在开始就不用再手动声明一个实例变量了，</span><br><span class="line"> */</span><br><span class="line">@synthesize myTitle;</span><br></pre></td></tr></table></figure>
+<p>3.第三版,考虑到变量名和getter的方法名、setter的参数名一样，容易让人误会，引起警告，所以默认给属性生成的同名变量名带下划线。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/*</span><br><span class="line"> 1.指定_myTitle作为myTitle的实例变量</span><br><span class="line"> 2.这样我们就可以去使用_myTitle，避免和setter名同名产生误会了</span><br><span class="line"> */</span><br><span class="line">@synthesize myTitle = _myTitle;</span><br></pre></td></tr></table></figure>
+<p>4.第四版，在IOS4.5后，也@synthesize可以省略了,最终就变成这样了</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br></pre></td></tr></table></figure>
+<p>如果我们把上面的过程全部显示出来的话，本质如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">**.h**</span><br><span class="line">#import &lt;UIKit/UIKit.h&gt;</span><br><span class="line"></span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">&#123;</span><br><span class="line">/*</span><br><span class="line">***被隐藏的代码：***</span><br><span class="line">1.这个默认是@synthesize myTitle = _myTitle;生成的</span><br><span class="line">2.所以如果我们手动设置@synthesize myTitle，那么我们编译器</span><br><span class="line">  生成的变量就是NSString *myTitle,相当于@synthesize myTitle = myTitle,</span><br><span class="line">  如果设置@synthesize myTitle = youTitle，那么编译器生成的变量就是NSString *youTitle了</span><br><span class="line">  这要注意。</span><br><span class="line">*/</span><br><span class="line">    NSString *_myTitle;</span><br><span class="line">&#125;</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">//***被隐藏的代码***</span><br><span class="line">//编译器遇到@property会自动声明setter/getter方法</span><br><span class="line">- (void)setMyTitle:(NSString *)myTitle;</span><br><span class="line">- (NSString *)myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">**.m**</span><br><span class="line">/*</span><br><span class="line">***被隐藏的代码***</span><br><span class="line">1.@synthesize关键字会自动实现setter/getter的方法</span><br><span class="line">2.@synthesize myTitle = _myTitle指明了属性myTitle的实例变</span><br><span class="line">量是_myTitle,setter/getter操作的对象就是_myTitle.</span><br><span class="line"></span><br><span class="line">*/</span><br><span class="line">@synthesize myTitle = _myTitle;</span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    _myTitle = @&quot;123&quot;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//***被隐藏的代码***</span><br><span class="line">//由关键字@synthesize自动实现</span><br><span class="line">- (NSString *)myTitle&#123;</span><br><span class="line">    return _myTitle;</span><br><span class="line">&#125;</span><br><span class="line">- (void)setMyTitle:(NSString *)myTitle&#123;</span><br><span class="line">    _myTitle = myTitle;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码说明：</p>
+<ol>
+<li>编译器遇到关键字 <code>@property</code> ，自动声明setter/getter方法。</li>
+<li>编译器遇到 <code>@synthesize</code> ,自动实现setter/getter方法。</li>
+<li><code>@synthesize myTitle = _myTitle;</code> 为属性 <code>myTitle</code> 生成了一个实例变量 <code>_myTitle</code> ,所以我们对属性的操作<code>self.myTitle</code> 实质上都是在操作<code>_myTitle</code> 变量。</li>
+</ol>
+<p><strong>所以属性、实例变量和成员变量的关系是：</strong><br>声明属性的时候编译器自动生成的实例变量，实例变量的本质就是成员变量，<code>self.myTitle</code>操作属性的时候实质上是在操作成员变量 <code>_myTitle</code> (也就是实例变量)。</p>
+<h3 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h3><ol>
+<li>我们能否认为新编译器LLVM下的@property == 老编译器GCC的 成员变量+ @property + @synthesize 成员变量呢？</li>
+</ol>
+<p>答案是否定的，<br>因为成员变量+ @property + @synthesize 成员变量的形式，编译器不会帮我们生成<em>成员变量，因此不会操作</em>成员变量了(注:区别就是LVVM操作实际是_成员变量,GCC操作成员变量,这样来说并不==)；<br>同时@synthesize 还有一个作用，可以指定与属性对应的实例变量，<br>例如@synthesize myString = xxx；<br>那么self.myString其实是操作的实例变量xxx，而非_String了。</p>
+<p><a href="https://www.jianshu.com/p/1a153b49d3bc" target="_blank" rel="noopener">详情参考:成员变量和属性的前世今生</a></p>
+<ol>
+<li>同时重写 <code>setter/getter</code> 的问题</li>
+</ol>
+<p>我们会发现，当我们同时重写 <code>setter/getter</code> 时会报错，为什么呢？这是因为当我们同时重写 <code>setter/getter</code> 时，编译器自动添加的代码<code>@synthesize myTitle = _myTitle;</code> 失效，就不会自动为我们生成实例变量<code>_myTitle</code> 了，<code>setter/getter</code> 操作的对象就不存在了。所以我们要加上<code>@synthesize myTitle = _myTitle;</code> ,手动指定setter/getter要操作的实例对象是<code>_my</code> </p>
+<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p>注：参考价值排序</p>
+<ul>
+<li><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">1. iOS 基础知识回顾——关于 property:全</a></li>
+<li><a href="https://www.jianshu.com/p/8e6606ce759d" target="_blank" rel="noopener">2. IOS属性的作用</a></li>
+<li><a href="https://blog.csdn.net/qq_25475307/article/details/78249675" target="_blank" rel="noopener">3. 关于Objective-C中的@property以及属性分析</a></li>
+<li><a href="https://www.jianshu.com/p/1a153b49d3bc" target="_blank" rel="noopener">4. 成员变量和属性的前世今生</a></li>
+<li><a href="http://www.cnblogs.com/PSSSCode/p/5510585.html" target="_blank" rel="noopener">5. iOS Category 和 Protocol 中的 Property</a></li>
+<li><a href="https://blog.csdn.net/u012946824/article/details/51788565" target="_blank" rel="noopener">6. 解惑——iOS中成员变量和属性区别</a></li>
+<li><a href="https://www.jianshu.com/p/6c0da0af5d3e" target="_blank" rel="noopener">7. iOS 成员变量，实例变量，属性变量的区别与联系</a></li>
+<li><a href="https://www.cnblogs.com/handsomeBoys/p/5672352.html" target="_blank" rel="noopener">8. iOS 同时重写setter和getter</a></li>
+<li><a href="https://www.cnblogs.com/Jenaral/p/5970393.html" target="_blank" rel="noopener">9. iOS 成员变量，实例变量，属性变量的区别，联系</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/property/" rel="tag"># property</a>
+          
+            <a href="/tags/Instance-ivars/" rel="tag"># Instance ivars</a>
+          
+            <a href="/tags/成员变量/" rel="tag"># 成员变量</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/10/synthesize-dynamic详解/" rel="next" title="@synthesize @dynamic详解">
+                <i class="fa fa-chevron-left"></i> @synthesize @dynamic详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/10/property详解/" rel="prev" title="@property详解">
+                @property详解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zomfice</p>
+              <p class="site-description motion-element" itemprop="description">巧笑倩兮,美目盼兮</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概念与区别："><span class="nav-number">1.</span> <span class="nav-text">1. 概念与区别：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-历史和关系："><span class="nav-number">2.</span> <span class="nav-text">2. 历史和关系：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#GCC"><span class="nav-number">2.0.1.</span> <span class="nav-text">GCC</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LLVM"><span class="nav-number">2.0.2.</span> <span class="nav-text">LLVM</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题："><span class="nav-number">3.</span> <span class="nav-text">问题：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考："><span class="nav-number">4.</span> <span class="nav-text">参考：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zomfice</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
