@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="OC最初设定@property和@synthesize的作用： 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量) 2. @synthesize的作用是实现属性的,如getter，setter方法。  在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中定义，把属性的存取方法作用于变量。如：.">
+<meta name="description" content="@synthesize @dynamic OC最初设定@property和@synthesize的作用： 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量) 2. @synthesize的作用是实现属性的,如getter，setter方法。  在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中">
 <meta name="keywords" content="synthesize,dynamic">
 <meta property="og:type" content="article">
 <meta property="og:title" content="@synthesize @dynamic详解">
 <meta property="og:url" content="http://yoursite.com/2018/05/10/synthesize-dynamic详解/index.html">
 <meta property="og:site_name" content="Zomfice’s blog">
-<meta property="og:description" content="OC最初设定@property和@synthesize的作用： 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量) 2. @synthesize的作用是实现属性的,如getter，setter方法。  在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中定义，把属性的存取方法作用于变量。如：.">
+<meta property="og:description" content="@synthesize @dynamic OC最初设定@property和@synthesize的作用： 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量) 2. @synthesize的作用是实现属性的,如getter，setter方法。  在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-10T12:24:40.777Z">
+<meta property="og:updated_time" content="2018-05-10T12:25:59.502Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="@synthesize @dynamic详解">
-<meta name="twitter:description" content="OC最初设定@property和@synthesize的作用： 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量) 2. @synthesize的作用是实现属性的,如getter，setter方法。  在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中定义，把属性的存取方法作用于变量。如：.">
+<meta name="twitter:description" content="@synthesize @dynamic OC最初设定@property和@synthesize的作用： 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量) 2. @synthesize的作用是实现属性的,如getter，setter方法。  在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中">
 
 
 
@@ -342,20 +342,20 @@
       
 
       
-        <blockquote>
+        <h3 id="synthesize-dynamic"><a href="#synthesize-dynamic" class="headerlink" title="@synthesize @dynamic"></a>@synthesize @dynamic</h3><blockquote>
 <p>OC最初设定@property和@synthesize的作用：<br><br><br><br> 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量)<br><br><br><br> 2. @synthesize的作用是实现属性的,如getter，setter方法。</p>
 </blockquote>
 <p>在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中定义，把属性的存取方法作用于变量。如：.h文件中</p>
 <p>后来因为使用@property灰常频繁，就简略了@synthesize的表达</p>
 <p>从Xcode4.4以后@property已经独揽了@synthesize的功能主要有三个作用：</p>
-<h3 id="synthesize三个作用："><a href="#synthesize三个作用：" class="headerlink" title="synthesize三个作用："></a>synthesize三个作用：</h3><ol>
+<h3 id="synthesize三个作用："><a href="#synthesize三个作用：" class="headerlink" title="@synthesize三个作用："></a>@synthesize三个作用：</h3><ol>
 <li>生成了成员变量get/set方法的声明</li>
 <li>生成了私有的带下划线的的成员变量因此子类不可以直接访问，但是可以通过. get/set方法访问。那么如果想让定义的成员变量让子类直接访问那么只能在.h文件. 中. 定义成员变量了，因为它默认是@protected</li>
 <li>生成了get/set方法的实现</li>
 </ol>
 <p>用@property声明的成员属性,相当于自动生成了setter getter方法,如果重写了set和get方法,与@property声明的成员属性就不是一个成员属性了,是另外一个实例变量,而这个实例变量需要手动声明。所以会报错误。</p>
 <p>总结：一定要分清属性和变量的区别，不能混淆。@synthesize 声明的属性=变量。意思是，将属性的setter,getter方法，作用于这个变量。</p>
-<h3 id="synthesize：自动合成"><a href="#synthesize：自动合成" class="headerlink" title="synthesize：自动合成"></a><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">synthesize：自动合成</a></h3><ul>
+<h3 id="synthesize：自动合成"><a href="#synthesize：自动合成" class="headerlink" title="@synthesize：自动合成"></a><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">@synthesize：自动合成</a></h3><ul>
 <li>自动合成 getter, setter：注意名字编译器会自动检查，如果没有手动实现，会自动添加 getter，setter，如果实现了，则不做处理</li>
 <li>具体合成那些其实还和 ready write 相关修饰符相关的，默认为 readwrite</li>
 <li>指定变量名字：@synthesize firstName = _myFirstName;</li>
@@ -372,7 +372,7 @@
 <li>在 category 中定义的所有属性</li>
 <li>重载的属性</li>
 </ul>
-<h3 id="dynamic：禁止自动合成"><a href="#dynamic：禁止自动合成" class="headerlink" title="dynamic：禁止自动合成"></a><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">dynamic：禁止自动合成</a></h3><ul>
+<h3 id="dynamic：禁止自动合成"><a href="#dynamic：禁止自动合成" class="headerlink" title="@dynamic：禁止自动合成"></a><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">@dynamic：禁止自动合成</a></h3><ul>
 <li><p>禁止自动合成getter, setter：告诉编译器属性的 setter 与 getter 方法由用户自己实现，不自动生成。（当然对于 readonly 的属性只需提供 getter 即可）</p>
 </li>
 <li><p>注意：属性被声明为 @dynamic var，然后你没有提供 @setter方法和 @getter 方法，编译的时候没问题，但是当程序运行到 instance.var = someVar，由于缺 setter 方法会导致程序崩溃； 或者当运行到 someVar = var 时，由于缺 getter 方法同样会导致崩溃。编译时没问题，运行时才执行相应的方法，这就是所谓的动态绑定</p>
@@ -582,7 +582,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#synthesize三个作用："><span class="nav-number">1.</span> <span class="nav-text">synthesize三个作用：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#synthesize：自动合成"><span class="nav-number">2.</span> <span class="nav-text">synthesize：自动合成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dynamic：禁止自动合成"><span class="nav-number">3.</span> <span class="nav-text">dynamic：禁止自动合成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用场景"><span class="nav-number">4.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考："><span class="nav-number">5.</span> <span class="nav-text">参考：</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#synthesize-dynamic"><span class="nav-number">1.</span> <span class="nav-text">@synthesize @dynamic</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#synthesize三个作用："><span class="nav-number">2.</span> <span class="nav-text">@synthesize三个作用：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#synthesize：自动合成"><span class="nav-number">3.</span> <span class="nav-text">@synthesize：自动合成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dynamic：禁止自动合成"><span class="nav-number">4.</span> <span class="nav-text">@dynamic：禁止自动合成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用场景"><span class="nav-number">5.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考："><span class="nav-number">6.</span> <span class="nav-text">参考：</span></a></li></ol></div>
             
 
           </div>
