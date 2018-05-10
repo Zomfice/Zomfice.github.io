@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="property," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="目录: 本质 修饰符 synthesize, dynamic KVO 与 Property  @property 本质： 概述: @property = ivar + getter + setter@property 其实是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境“属性” (property)作为 Objective-C 的一项特性，主">
+<meta name="keywords" content="property">
+<meta property="og:type" content="article">
+<meta property="og:title" content="@property详解">
+<meta property="og:url" content="http://yoursite.com/2018/05/10/property详解/index.html">
+<meta property="og:site_name" content="Zomfice’s blog">
+<meta property="og:description" content="目录: 本质 修饰符 synthesize, dynamic KVO 与 Property  @property 本质： 概述: @property = ivar + getter + setter@property 其实是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境“属性” (property)作为 Objective-C 的一项特性，主">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr67tmzavbj20ne067ab1.jpg">
+<meta property="og:image" content="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr68bazzl1j20qh0fvmzp.jpg">
+<meta property="og:updated_time" content="2018-05-10T09:36:31.897Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="@property详解">
+<meta name="twitter:description" content="目录: 本质 修饰符 synthesize, dynamic KVO 与 Property  @property 本质： 概述: @property = ivar + getter + setter@property 其实是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境“属性” (property)作为 Objective-C 的一项特性，主">
+<meta name="twitter:image" content="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr67tmzavbj20ne067ab1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/10/property详解/"/>
+
+
+
+
+
+  <title>@property详解 | Zomfice’s blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zomfice’s blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/10/property详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zomfice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zomfice’s blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">@property详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-10T17:35:33+08:00">
+                2018-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OC/" itemprop="url" rel="index">
+                    <span itemprop="name">OC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="目录"><a href="#目录" class="headerlink" title="目录:"></a>目录:</h3><ul>
+<li>本质</li>
+<li>修饰符</li>
+<li>synthesize, dynamic</li>
+<li>KVO 与 Property</li>
+</ul>
+<h3 id="property-本质："><a href="#property-本质：" class="headerlink" title="@property 本质："></a>@property 本质：</h3><blockquote>
+<p>概述: @property = ivar + getter + setter<br><br><br><br>@property 其实是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境<br><br><br>“属性” (property)作为 Objective-C 的一项特性，主要的作用就在于封装对象中的数据。 Objective-C 对象通常会把其所需要的数据保存为各种实例变量。实例变量一般通过“存取方法”(access method)来访问。其中，“获取方法” (getter)用于读取变量值，而“设置方法” (setter)用于写入变量值。这个概念已经定型，并且经由“属性”这一特性而成为<br><br>Objective-C 2.0 的一部分。 而在正规的 Objective-C 编码风格中，存取方法有着严格的命名规范。 正因为有了这种严格的命名规范，所以 Objective-C 这门语言才能根据名称自动创建出存取方法。</p>
+</blockquote>
+<h4 id="ivar，getter，setter-是什么？"><a href="#ivar，getter，setter-是什么？" class="headerlink" title="ivar，getter，setter 是什么？"></a>ivar，getter，setter 是什么？</h4><ul>
+<li><p><a href="http://blog.sunnyxx.com/2015/09/13/class-ivar-layout/" target="_blank" rel="noopener">ivar</a>：作为变量存放的载体，是真正存放变量的（不完全正确，可能是指针），和其他语言的类下的变量含义一样</p>
+</li>
+<li><p>getter：变量访问方法。变量的访问方法都可以称之为 getter。@property 自动的生成的 getter 是根据变量名有关的。</p>
+</li>
+<li><p>setter：变量的修改/设置方法。变量的修改设置方法都可以称之为 setter。@property 自动的生成的 getter 是根据变量名有关的。</p>
+</li>
+</ul>
+<h4 id="代码-property-NSString-firstName-做了什么？"><a href="#代码-property-NSString-firstName-做了什么？" class="headerlink" title="代码 @property NSString *firstName 做了什么？"></a>代码 @property NSString *firstName 做了什么？</h4><p>前面提到 @perperty 是 ivar，getter，setter 的集合，他们的命名是有规则的。</p>
+<ul>
+<li>命名规则/规范： ivar，getter，setter</li>
+<li>ivar 名： _firstName</li>
+<li>getter 名：firstName</li>
+<li>setter 名： setFirstName</li>
+<li>其他默认行为：<br>其他的默认行为和修饰符相关的，见修饰符的影响</li>
+</ul>
+<h4 id="修饰符的影响："><a href="#修饰符的影响：" class="headerlink" title="修饰符的影响："></a>修饰符的影响：</h4><ul>
+<li>atomic：setter，getter 中添加 spinlock 来确定操作的原子性。atomaic 这个是默认行为。nonatomic 则不会添加 spinlock 相关代码</li>
+<li>readwrite：同时生成 getter，setter 方法，</li>
+<li>readonly：仅仅生成 getter</li>
+<li>strong，weak，assign：控制编译器自动添加 arc 相关代码。细节见修饰符</li>
+<li>retain, copy, assign：控制 setter 对于入参的处理。细节见修饰符</li>
+</ul>
+<p>property 与 protocol，category：</p>
+<ol>
+<li>是否可以使用？</li>
+</ol>
+<p>答：在 protocol 和 category 都可以使用</p>
+<ol>
+<li>@perperty 究竟做了什么？</li>
+</ol>
+<p>答：在 protocol 中只是声明了 setter，getter 方法；在 category 也只是声明了 setter 和 getter 方法，没有添加 ivar。</p>
+<ol>
+<li>如何在 category 中添加 变量？</li>
+</ol>
+<p>答：通过 objc_setAssociatedObject，objc_getAssociatedObject 实现添加关联变量。</p>
+<h3 id="修饰符："><a href="#修饰符：" class="headerlink" title="修饰符："></a>修饰符：</h3><p>修饰符处理的对象其实是 getter，setter，定义了编译器对于 getter，setter 的合成相关操作</p>
+<h4 id="atomic与nonatomic"><a href="#atomic与nonatomic" class="headerlink" title="atomic与nonatomic"></a>atomic与nonatomic</h4><ul>
+<li><p>atomic：默认是有该属性的，这个属性是为了保证程序在多线程情况，编译器会自动生成一些互斥加锁代码，避免该变量的读写不同步问题。</p>
+</li>
+<li><p>nonatomic：如果该对象无需考虑多线程的情况，请加入这个属性，这样会让编译器少生成一些互斥加锁代码，可以提高效率。</p>
+</li>
+</ul>
+<p>注意：</p>
+<ul>
+<li><p>针对的是指 getter，setter，而不是说 ivar</p>
+</li>
+<li><p>是通过自旋锁 SpinLock 来实现原子的。iOS 上默认是 atomic。</p>
+</li>
+</ul>
+<h4 id="readwrite与readonly"><a href="#readwrite与readonly" class="headerlink" title="readwrite与readonly"></a>readwrite与readonly</h4><ul>
+<li>readwrite：这个属性是默认的情况，会自动为你生成存取器。</li>
+<li>readonly：只生成getter不会有setter方法。</li>
+<li>readwrite、readonly这两个属性通常是用来控制成员变量的访问权限。</li>
+</ul>
+<h4 id="strong与weak："><a href="#strong与weak：" class="headerlink" title="strong与weak："></a>strong与weak：</h4><ul>
+<li><p>strong：强引用，也是我们通常说的引用，其存亡直接决定了所指向对象的存亡。如果不存在指向一个对象的引用，并且此对象不再显示在列表中，则此对象会被从内存中释放。对于引用计数而言，引用计数会增加</p>
+</li>
+<li><p>weak：弱引用，不决定对象的存亡。即使一个对象被持有无数个弱引用，只要没有强引用指向它，那么还是会被清除。引用计数不会改变，但是会把指针添加到对象的 weak table 中，为 nil 的时候将本指针也设置为 nil。</p>
+<p>  weak runtime 实现：属性 ivar 的具体设置函数，我们假定为objc_storeWeak(&amp;a, b) 函数</p>
+<p>  objc_storeWeak 函数把第二个参数–赋值对象（b）的内存地址作为键值key，将第一个参数–weak修饰的属性变量（a）的内存地址（&amp;a）作为value，注册到 weak 表中。如果第二个参数（b）为0（nil），那么把变量（a）的内存地址（&amp;a）从weak表中删除，</p>
+<p>  你可以把objc_storeWeak(&amp;a, b)理解为：objc_storeWeak(value, key)，并且当key变nil，将value置nil。</p>
+<p>  在b非nil时，a和b指向同一个内存地址，在b变nil时，a变nil。此时向a发送消息不会崩溃：在Objective-C中向nil发送消息是安全的。</p>
+</li>
+<li><p>strong与retain功能相似；weak与assign相似，只是当对象消失后weak会自动把指针变为nil;</p>
+</li>
+</ul>
+<h4 id="assign、copy、retain："><a href="#assign、copy、retain：" class="headerlink" title="assign、copy、retain："></a>assign、copy、retain：</h4><ul>
+<li><p>assign：对于基本类型，默认是该修饰符（非基本类型默认是 strong）。setter方法直接赋值，不进行任何retain操作，不改变引用计数。一般用来处理基本数据类型。</p>
+</li>
+<li><p>retain：释放旧的对象（release），将旧对象的值赋给新对象，再令新对象引用计数为1。我理解为指针的拷贝，拷贝一份原来的指针，释放原来指针指向的对象的内容，再令指针指向新的对象内容。</p>
+</li>
+<li><p>copy：与retain处理流程一样，先对旧值release，再copy出新的对象，retainCount为1.为了减少对上下文的依赖而引入的机 制。我理解为内容的拷贝，向内存申请一块空间，把原来的对象内容赋给它，令其引用计数为1。对copy属性要特别注意：被定义有copy属性的对象必须要 符合NSCopying协议，必须实现- (id)copyWithZone:(NSZone *)zone方法。</p>
+</li>
+<li><p>拷贝有浅拷贝，深拷贝：oc 中主要表现为的 copy，mutableCopy。关于 copy 更多信息见<a href="https://www.zybuluo.com/MicroCai/note/50592" target="_blank" rel="noopener">iOS 集合的深复制与浅复制</a></p>
+</li>
+</ul>
+<div align="center"><img width="60%" src="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr67tmzavbj20ne067ab1.jpg"></div>
+
+<ul>
+<li><p>直接使用：</p>
+</li>
+<li><p>使用assign: 对基础数据类型 （NSInteger，CGFloat）和C数据类型（int, float, double, char, 等等）</p>
+</li>
+<li><p>使用copy： 对NSString</p>
+</li>
+<li><p>使用retain： 对其他NSObject和其子类</p>
+</li>
+</ul>
+<h4 id="getter-setter："><a href="#getter-setter：" class="headerlink" title="getter setter："></a>getter setter：</h4><ul>
+<li>getter：是用来指定get方法的方法名</li>
+<li><p>setter：是用来指定set访求的方法名<br>在@property的属性中，如果这个属性是一个BOOL值，通常我们可以用getter来定义一个自己喜欢的名字，例如：</p>
+</li>
+<li><p>@property (nonatomic, assign, getter=isValue) boolean value;</p>
+</li>
+<li>@property (nonatomic, assign, setter=setIsValue) boolean value;</li>
+</ul>
+<h4 id="retain-copy-assign区别"><a href="#retain-copy-assign区别" class="headerlink" title="retain, copy, assign区别"></a>retain, copy, assign区别</h4><p>在 OC 中的内存管理的本质其实是通过引用计数来完成的，每个对象都有一个记录当前对象引用的次数，当引用次数为0的时候，才会去释放对象。 下面假设有新产生一个对象，a 作为指向这个对象的变量（指针），现将 a 使用不同的方式复制给 变量 b，</p>
+<ul>
+<li>assign： a 和 b指向同一块内存。assign 指示引用计数不增加，当前对象的引用计数依然为 1。而当 a 设置为 nil 的时候，由于引用计数变为 0，对象已经被释放，而 b 完全不知道，已经指向原来对象的地址，而原来的对象已经被是释放了，b 成为野指针。那么b在使用这块内存的时候会引起程序crash掉。</li>
+<li>retain： 在将 a 赋值给 b 的时候，a 和 b 都是指向同一个对象，该对象引用计数会 +1，变为 2。所以即使在 a = nil 的时候，对象的引用计数为1，所以依然不会释放，所以访问不会出现问题。在 b = nil 的时候，引用计数才会 0，才会被释放。</li>
+<li>copy：和上面 assign 和 retain 完全不同。assign 和 retain都是指向同一个对象，也就是共享一块内存。而 copy 指示，在复制的时候，并不是简单的赋值，而是拷贝原来的对象，然后将 b，指向这个拷贝生成的对象。由于 a 和 b 是两个不同的对象，仅仅是在值/内容相等。a = nil，对于 b 完全没有影响。</li>
+</ul>
+<h4 id="nonnull，nullablenull-resettable，-Null-unspecified："><a href="#nonnull，nullablenull-resettable，-Null-unspecified：" class="headerlink" title="nonnull，nullablenull_resettable，_Null_unspecified："></a>nonnull，nullablenull_resettable，_Null_unspecified：</h4><ul>
+<li>nonnull：不能为空</li>
+<li>nullable：表示可以为空</li>
+<li>null_resettable:</li>
+<li>get:不能返回空</li>
+<li>set可以为空</li>
+<li>注意：如果使用null_resettable,必须 重写get方法或者set方法,处理传递的值为空的情况</li>
+<li>_Null_unspecified：不确定是否为空</li>
+</ul>
+<h4 id="assign-与-weak-比较："><a href="#assign-与-weak-比较：" class="headerlink" title="assign 与 weak 比较："></a>assign 与 weak 比较：</h4><ol>
+<li>修饰变量类型的区别</li>
+</ol>
+<ul>
+<li>weak 只可以修饰对象。如果修饰基本数据类型，编译器会报错-“Property with ‘weak’ attribute must be of object type”。</li>
+<li>assign 可修饰对象，和基本数据类型。当需要修饰对象类型时，MRC时代使用unsafe_unretained。当然，unsafe_unretained也可能产生野指针，所以它名字是”unsafe_”</li>
+</ul>
+<ol>
+<li>是否产生野指针的区别</li>
+</ol>
+<ul>
+<li>weak 不会产生野指针问题。因为weak修饰的对象释放后（引用计数器值为0），指针会自动被置nil，之后再向该对象发消息也不会崩溃。 weak是安全的。</li>
+<li>assign 如果修饰对象，会产生野指针问题；如果修饰基本数据类型则是安全的。修饰的对象释放后，指针不会自动被置空，此时向对象发消息会崩溃。</li>
+</ul>
+<h4 id="synthesize和-dynamic"><a href="#synthesize和-dynamic" class="headerlink" title="@synthesize和@dynamic"></a>@synthesize和@dynamic</h4><p>property 是有 ivar ，getter，setter 构成。而这两个关键字处理的的是这三者间的关系的。编译器在编译期间完成。</p>
+<h4 id="synthesize：自动合成"><a href="#synthesize：自动合成" class="headerlink" title="@synthesize：自动合成"></a>@synthesize：自动合成</h4><ul>
+<li>自动合成 getter, setter：注意名字编译器会自动检查，如果没有手动实现，会自动添加 getter，setter，如果实现了，则不做处理</li>
+<li>具体合成那些其实还和 ready write 相关修饰符相关的，默认为 readwrite</li>
+<li>指定变量名字：@synthesize firstName = _myFirstName;</li>
+<li>合成规则：假设声明为 @property NSString *firstName;</li>
+<li>变量 ivar 名字ivar 变量名称为 _firstName</li>
+<li>getter, setter：getter 变量名称为 firstName， setter 为 setFirstName</li>
+</ul>
+<p>那些情况下自动合成会失效</p>
+<ul>
+<li>同时重写了 setter 和 getter 时</li>
+<li>重写了只读属性的 getter 时</li>
+<li>使用了 @dynamic 时</li>
+<li>在 @protocol 中定义的所有属性</li>
+<li>在 category 中定义的所有属性</li>
+<li>重载的属性</li>
+</ul>
+<h4 id="dynamic：禁止自动合成"><a href="#dynamic：禁止自动合成" class="headerlink" title="@dynamic：禁止自动合成"></a>@dynamic：禁止自动合成</h4><ul>
+<li><p>禁止自动合成getter, setter：告诉编译器属性的 setter 与 getter 方法由用户自己实现，不自动生成。（当然对于 readonly 的属性只需提供 getter 即可）</p>
+</li>
+<li><p>注意：属性被声明为 @dynamic var，然后你没有提供 @setter方法和 @getter 方法，编译的时候没问题，但是当程序运行到 instance.var = someVar，由于缺 setter 方法会导致程序崩溃； 或者当运行到 someVar = var 时，由于缺 getter 方法同样会导致崩溃。编译时没问题，运行时才执行相应的方法，这就是所谓的动态绑定</p>
+</li>
+<li><p>使用场景：</p>
+</li>
+</ul>
+<p>在CoreData的NSManagedObject类使用的某些。如果你想这些情况下，声明和使用属性，但要避免缺少方法在编译时的警告，你可以使用@dynamic动态指令，而不是@synthesize合成指令。</p>
+<h3 id="KVO："><a href="#KVO：" class="headerlink" title="KVO："></a>KVO：</h3><h4 id="什么是KVO？"><a href="#什么是KVO？" class="headerlink" title="什么是KVO？"></a>什么是KVO？</h4><p>KVO（Key Value Observing, 键值观察）是Objective-C对观察者模式的实现，每次当被观察对象的某个属性值发生改变时，注册的观察者便能获得通知。<br>使用：三个基本步骤：</p>
+<ol>
+<li>注册观察者，指定被观察对象的属性：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[obj addObserver:self forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];</span><br></pre></td></tr></table></figure>
+<p>其中，person即为被观察对象，它的name属性即为被观察的属性。</p>
+<ol>
+<li>在观察者中实现以下回调方法：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context</span><br></pre></td></tr></table></figure>
+<ol>
+<li>移除观察者</li>
+</ol>
+<h4 id="KVO-触发："><a href="#KVO-触发：" class="headerlink" title="KVO 触发："></a>KVO 触发：</h4><p>概述：触发依赖与以下三个函数：执行顺序如下</p>
+<ol>
+<li>willChangeValueForKey: 在一个被观察属性发生改变之前调用，记录旧的值</li>
+<li>observeValueForKeyPath:ofObject:change:context: 当改变发生后，调用该函数</li>
+<li>didChangeValueForKey: 在 2 完成后执行</li>
+</ol>
+<p>触发方式分类：</p>
+<ul>
+<li>自动触发：注册KVO，在 value 发生变化的时候自动触发。property 相关属性属性默认都是自动触发的</li>
+<li>手动触发： value 的变化，通过代码控制触发。</li>
+</ul>
+<h4 id="手动触发-KVO："><a href="#手动触发-KVO：" class="headerlink" title="手动触发 KVO："></a>手动触发 KVO：</h4><ul>
+<li>手动触发 KVO，就是通知 value 变化。主要有两种情况</li>
+</ul>
+<p>property 变量：默认情况下 property 的是自动触发，手动触发方法与步骤：</p>
+<pre><code>* 重载 + (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key： key 为手动触发的 key 的返回 NO，其他调用父方法
+* 重写 setter 方法：在修改值前后分别调用，willChangeValueForKey: 和 didChangeValueForKey:
+</code></pre><ul>
+<li><p>注意：</p>
+<ul>
+<li>上面步骤缺一不可</li>
+<li>如果步骤 1 缺失, 会导致 KVO 代码执行两次</li>
+</ul>
+</li>
+<li><p>非 property 变量：对于 property 变量，编译器会自动合成 getter 和 setter，而KVO 是运行期间的，依赖与 runtime。所以KVO 对于名字有严格的要求（setter）</p>
+</li>
+<li>方法：只需要在自己的 setter 中调用 willChangeValueForKey: 和 didChangeValueForKey: 即可。</li>
+</ul>
+<h4 id="手动触发-KVO-使用场景："><a href="#手动触发-KVO-使用场景：" class="headerlink" title="手动触发 KVO 使用场景："></a>手动触发 KVO 使用场景：</h4><ul>
+<li><p>自定义 setter 实现，setter 使用其他名字</p>
+</li>
+<li><p>category 分类的添加的属性</p>
+</li>
+<li><p>使用：objc_setAssociatedObject，objc_getAssociatedObject 添加关联变量</p>
+</li>
+</ul>
+<p>关于 category 详情见 <a href="http://blog.sunnyxx.com/2014/03/05/objc_category_secret/" target="_blank" rel="noopener">objc category的秘密</a></p>
+<h4 id="KVO-实现原理（Apple的实现）"><a href="#KVO-实现原理（Apple的实现）" class="headerlink" title="KVO 实现原理（Apple的实现）"></a>KVO 实现原理（Apple的实现）</h4><p>核心：isa + setter</p>
+<p>当你观察一个对象时，一个新的类会被动态创建。这个类继承自该对象的原本的类，并重写了被观察属性的 setter 方法。重写的 setter 方法会负责在调用原 setter 方法之前和之后，通知所有观察对象：值的更改。最后通过 isa 混写（isa-swizzling） 把这个对象的 isa 指针 ( isa 指针告诉 Runtime 系统这个对象的类是什么 ) 指向这个新创建的子类，对象就神奇的变成了新创建的子类的实例</p>
+<div align="center"><img width="60%" src="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr68bazzl1j20qh0fvmzp.jpg"></div>
+
+<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><ul>
+<li><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">iOS 基础知识回顾——关于 property</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/property/" rel="tag"># property</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/23/bridge，-bridge-transfer和-bridge-retained详解/" rel="next" title="__bridge，__bridge_transfer和__bridge_retained详解">
+                <i class="fa fa-chevron-left"></i> __bridge，__bridge_transfer和__bridge_retained详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/10/protocol属性-category属性-覆盖属性/" rel="prev" title="protocol属性 category属性 覆盖属性">
+                protocol属性 category属性 覆盖属性 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zomfice</p>
+              <p class="site-description motion-element" itemprop="description">巧笑倩兮,美目盼兮</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#目录"><span class="nav-number">1.</span> <span class="nav-text">目录:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#property-本质："><span class="nav-number">2.</span> <span class="nav-text">@property 本质：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ivar，getter，setter-是什么？"><span class="nav-number">2.1.</span> <span class="nav-text">ivar，getter，setter 是什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码-property-NSString-firstName-做了什么？"><span class="nav-number">2.2.</span> <span class="nav-text">代码 @property NSString *firstName 做了什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修饰符的影响："><span class="nav-number">2.3.</span> <span class="nav-text">修饰符的影响：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修饰符："><span class="nav-number">3.</span> <span class="nav-text">修饰符：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#atomic与nonatomic"><span class="nav-number">3.1.</span> <span class="nav-text">atomic与nonatomic</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#readwrite与readonly"><span class="nav-number">3.2.</span> <span class="nav-text">readwrite与readonly</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#strong与weak："><span class="nav-number">3.3.</span> <span class="nav-text">strong与weak：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#assign、copy、retain："><span class="nav-number">3.4.</span> <span class="nav-text">assign、copy、retain：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#getter-setter："><span class="nav-number">3.5.</span> <span class="nav-text">getter setter：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#retain-copy-assign区别"><span class="nav-number">3.6.</span> <span class="nav-text">retain, copy, assign区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nonnull，nullablenull-resettable，-Null-unspecified："><span class="nav-number">3.7.</span> <span class="nav-text">nonnull，nullablenull_resettable，_Null_unspecified：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#assign-与-weak-比较："><span class="nav-number">3.8.</span> <span class="nav-text">assign 与 weak 比较：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#synthesize和-dynamic"><span class="nav-number">3.9.</span> <span class="nav-text">@synthesize和@dynamic</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#synthesize：自动合成"><span class="nav-number">3.10.</span> <span class="nav-text">@synthesize：自动合成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dynamic：禁止自动合成"><span class="nav-number">3.11.</span> <span class="nav-text">@dynamic：禁止自动合成</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KVO："><span class="nav-number">4.</span> <span class="nav-text">KVO：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是KVO？"><span class="nav-number">4.1.</span> <span class="nav-text">什么是KVO？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO-触发："><span class="nav-number">4.2.</span> <span class="nav-text">KVO 触发：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#手动触发-KVO："><span class="nav-number">4.3.</span> <span class="nav-text">手动触发 KVO：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#手动触发-KVO-使用场景："><span class="nav-number">4.4.</span> <span class="nav-text">手动触发 KVO 使用场景：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO-实现原理（Apple的实现）"><span class="nav-number">4.5.</span> <span class="nav-text">KVO 实现原理（Apple的实现）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考："><span class="nav-number">5.</span> <span class="nav-text">参考：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zomfice</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

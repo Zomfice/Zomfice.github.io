@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="protocol属性,category属性," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="protocol属性 protocol属性只有对应的set/get方法声明,没有对应成员变量,因为协议中只可以声明方法，分类中只能声明方法和对应的实现。  详解: 在protocol中,通过查看runtime源码,没有Ivar实例变量,@property只是对set/get方法声明 @interface Protocol : Object&amp;#123;@private    char *protoc">
+<meta name="keywords" content="protocol属性,category属性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="protocol属性 category属性 覆盖属性">
+<meta property="og:url" content="http://yoursite.com/2018/05/10/protocol属性-category属性-覆盖属性/index.html">
+<meta property="og:site_name" content="Zomfice’s blog">
+<meta property="og:description" content="protocol属性 protocol属性只有对应的set/get方法声明,没有对应成员变量,因为协议中只可以声明方法，分类中只能声明方法和对应的实现。  详解: 在protocol中,通过查看runtime源码,没有Ivar实例变量,@property只是对set/get方法声明 @interface Protocol : Object&amp;#123;@private    char *protoc">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-10T09:38:56.879Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="protocol属性 category属性 覆盖属性">
+<meta name="twitter:description" content="protocol属性 protocol属性只有对应的set/get方法声明,没有对应成员变量,因为协议中只可以声明方法，分类中只能声明方法和对应的实现。  详解: 在protocol中,通过查看runtime源码,没有Ivar实例变量,@property只是对set/get方法声明 @interface Protocol : Object&amp;#123;@private    char *protoc">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/10/protocol属性-category属性-覆盖属性/"/>
+
+
+
+
+
+  <title>protocol属性 category属性 覆盖属性 | Zomfice’s blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zomfice’s blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/10/protocol属性-category属性-覆盖属性/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zomfice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zomfice’s blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">protocol属性 category属性 覆盖属性</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-10T17:37:21+08:00">
+                2018-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/OC/" itemprop="url" rel="index">
+                    <span itemprop="name">OC</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="protocol属性"><a href="#protocol属性" class="headerlink" title="protocol属性"></a>protocol属性</h3><blockquote>
+<p>protocol属性只有对应的set/get方法声明,没有对应成员变量,因为协议中只可以声明方法，分类中只能声明方法和对应的实现。</p>
+</blockquote>
+<p>详解: 在protocol中,通过查看runtime源码,没有Ivar实例变量,@property只是对set/get方法声明</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@interface Protocol : Object</span><br><span class="line">&#123;</span><br><span class="line">@private</span><br><span class="line">    char *protocol_name OBJC2_UNAVAILABLE;</span><br><span class="line">    struct objc_protocol_list *protocol_list OBJC2_UNAVAILABLE;</span><br><span class="line">    struct objc_method_description_list *instance_methods OBJC2_UNAVAILABLE;</span><br><span class="line">    struct objc_method_description_list *class_methods OBJC2_UNAVAILABLE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于遵守协议的类中，存取器的生成只是根据成员变量而生成的。而在协议中没有成员变量存在，所有就没有对应的set/get方法实现。而synthesize 实例变量 = _实例变量,系统会自动生成实例变量,也会生成set/get方法。</p>
+<p>注:(解释为什么分类和协议中无法自动生成实例变量和set/get方法)</p>
+<p>如果已经手动实现了get和set方法的话Xcode不会再自动生成带有下划线的私有成 员变量了<br>因为xCode自动生成成员变量的目的就是为了根据成员变量而生成get/set方法的<br>但是如果get和set方法缺一个的话都会生成带下划线的变量<a href="https://www.jianshu.com/p/cee2e058ce82" target="_blank" rel="noopener">详情查看</a></p>
+<ol>
+<li>定义一个mmNum属性,重写get/set方法,如果写@synthesize mmNum = _mmNum;将会 Use of undeclared identifier ‘_mmNum’;did you mean ‘mmNum’</li>
+</ol>
+<p>通过clang将.m文件转成cpp.之后看到有set/get方法,但是没有实例变量存在</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">clang -rewrite-objc MM.m</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">static void _I_MM_setMmNum_(MM * self, SEL _cmd, int mmNum) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static int _I_MM_mmNum(MM * self, SEL _cmd) &#123;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当加上@synthesize mmNum = _mmNum;可以看到实例变量生成,同时@synthesize将set/get方法作用实例变量</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// @interface MM ()&lt;MMProtocol&gt;</span><br><span class="line">// @property (nonatomic,assign) int mmNum;</span><br><span class="line">/* @end */</span><br><span class="line"></span><br><span class="line">// @implementation MM</span><br><span class="line">// @synthesize mmNum = _mmNum;</span><br><span class="line"></span><br><span class="line">struct MM_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	int _mmNum;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">static struct /*_ivar_list_t*/ &#123;</span><br><span class="line">	unsigned int entsize;  // sizeof(struct _prop_t)</span><br><span class="line">	unsigned int count;</span><br><span class="line">	struct _ivar_t ivar_list[1];</span><br><span class="line">&#125; _OBJC_$_INSTANCE_VARIABLES_MM __attribute__ ((used, section (&quot;__DATA,__objc_const&quot;))) = &#123;</span><br><span class="line">	sizeof(_ivar_t),</span><br><span class="line">	1,</span><br><span class="line">	&#123;&#123;(unsigned long int *)&amp;OBJC_IVAR_$_MM$_mmNum, &quot;_mmNum&quot;, &quot;i&quot;, 2, 4&#125;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>在Protocol定义属性,只是对set/get方法声明,不加synthesize的时候,类中是没有对应的实例变量和方法实现的。当我们添加对应的@synthesize 属性 = _属性的时候,发现方法实现</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">extern &quot;C&quot; unsigned long OBJC_IVAR_$_MM$_proNum;</span><br><span class="line">struct MM_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	int _mmNum;</span><br><span class="line">	int _proNum;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">static int _I_MM_proNum(MM * self, SEL _cmd) &#123; return (*(int *)((char *)self + OBJC_IVAR_$_MM$_proNum)); &#125;</span><br><span class="line">static void _I_MM_setProNum_(MM * self, SEL _cmd, int proNum) &#123; (*(int *)((char *)self + OBJC_IVAR_$_MM$_proNum)) = proNum; &#125;</span><br><span class="line"></span><br><span class="line">static struct /*_ivar_list_t*/ &#123;</span><br><span class="line">	unsigned int entsize;  // sizeof(struct _prop_t)</span><br><span class="line">	unsigned int count;</span><br><span class="line">	struct _ivar_t ivar_list[2];</span><br><span class="line">&#125; _OBJC_$_INSTANCE_VARIABLES_MM __attribute__ ((used, section (&quot;__DATA,__objc_const&quot;))) = &#123;</span><br><span class="line">	sizeof(_ivar_t),</span><br><span class="line">	2,</span><br><span class="line">	&#123;&#123;(unsigned long int *)&amp;OBJC_IVAR_$_MM$_mmNum, &quot;_mmNum&quot;, &quot;i&quot;, 2, 4&#125;,</span><br><span class="line">	 &#123;(unsigned long int *)&amp;OBJC_IVAR_$_MM$_proNum, &quot;_proNum&quot;, &quot;i&quot;, 2, 4&#125;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>结论:推断结论是,属性的set/get方法是根据实例变量来实现,由于protocol没有ivars实例变量对象,所以,protocol中的属性,只是相当于set/get方法声明,而要实现set/get方法,需要指定相应的实例变量,以此来让编译器去生成get/set方法。</p>
+<h3 id="category属性"><a href="#category属性" class="headerlink" title="category属性"></a>category属性</h3><p>分类中添加属性,由于分类中只能声明方法和实习方法,不能生成实例变量,所以分类中不能自动生成set/get方法,而且需要运行时去关联方法和对象,runtime源码中</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct category_t &#123;</span><br><span class="line">    const char *name;</span><br><span class="line">    classref_t cls;</span><br><span class="line">    struct method_list_t *instanceMethods;</span><br><span class="line">    struct method_list_t *classMethods;</span><br><span class="line">    struct protocol_list_t *protocols;</span><br><span class="line">    struct property_list_t *instanceProperties;</span><br><span class="line">    // Fields below this point are not always present on disk.</span><br><span class="line">    struct property_list_t *_classProperties;</span><br><span class="line"></span><br><span class="line">    method_list_t *methodsForMeta(bool isMeta) &#123;</span><br><span class="line">        if (isMeta) return classMethods;</span><br><span class="line">        else return instanceMethods;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    property_list_t *propertiesForMeta(bool isMeta, struct header_info *hi);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>分类中添加属性举例:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@interface NSObject (Extension)</span><br><span class="line">@property (nonatomic,strong) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">#import &lt;objc/runtime.h&gt;</span><br><span class="line">@implementation NSObject (Extension)</span><br><span class="line">- (NSString *)myTitle &#123;</span><br><span class="line">    return objc_getAssociatedObject(self, @selector(myTitle));   </span><br><span class="line">&#125;</span><br><span class="line">- (void)setMyTitle:(NSString *)myTitle &#123;</span><br><span class="line">    objc_setAssociatedObject(self, @selector(myTitle), myTitle,OBJC_ASSOCIATION_RETAIN);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="属性覆盖"><a href="#属性覆盖" class="headerlink" title="属性覆盖"></a>属性覆盖</h3><ul>
+<li>首先看一个例子：ZZYObject2是ZZYObject1的字类，它们都有一个同样的属性myName</li>
+</ul>
+<p>类ZZYObject1的代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line"></span><br><span class="line">@interface ZZYObject1 : NSObject</span><br><span class="line"></span><br><span class="line">@property(nonatomic,copy)NSString* myName;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">#import &quot;ZZYObject1.h&quot;</span><br><span class="line"></span><br><span class="line">@implementation ZZYObject1</span><br><span class="line"></span><br><span class="line">-(void)setMyName:(NSString *)myName&#123;</span><br><span class="line">    _myName = @&quot;我是ZZYObject1的set 方法&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>类ZZYObject2的代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &quot;ZZYObject1.h&quot;</span><br><span class="line"></span><br><span class="line">@interface ZZYObject2 : ZZYObject1</span><br><span class="line"></span><br><span class="line">@property(nonatomic,copy)NSString* myName;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">#import &quot;ZZYObject2.h&quot;</span><br><span class="line"></span><br><span class="line">@implementation ZZYObject2</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>在ViewController调用代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &quot;ViewController.h&quot;</span><br><span class="line">#import &quot;ZZYObject2.h&quot;</span><br><span class="line"></span><br><span class="line">@interface ViewController ()</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation ViewController</span><br><span class="line"></span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    ZZYObject2*z2 = [[ZZYObject2 alloc]init];</span><br><span class="line">    z2.myName = @&quot;dsada&quot;;</span><br><span class="line">    NSLog(@&quot;我set了ZZYObject2 %@&quot;,z2.myName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>我们发现：ZZYObject2中的@property(nonatomic,copy)NSString* myName;这句代码有警告：“ Auto property synthesis will not synthesize property ‘myName’; it will be implemented by its superclass, use @dynamic to acknowledge intention”。上面打印的结果为：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2017-02-24 11:02:14.389732 FugaiShuXing[10620:3285829] 我是ZZYObject1的set 方法</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>上面打印的并不是我们想要的结果，上面走的是父类ZZYObject1的set方法。原来在子类覆盖父类的属性时，编译器不会为子类合成带下划线的实例变量以及setter和getter方法，则需要自己来实现这些东西，否则这个属性将由父类实现，也就是说如果子类没有手写set和get方法，声明的@property相当于没写。</p>
+</li>
+<li><p>我们在ZZYObject2实现文件的代码加上一句@synthesize myName = _myName;（或者用“@dynamic完全接管property的方式”也可以，当然正如上面的警告系统也是推荐的@dynamic）就可以了。</p>
+</li>
+</ul>
+<p>注：@dynamic完全接管property的方式，可参考应用场景1或2更正后的写法</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &quot;ZZYObject2.h&quot;</span><br><span class="line"></span><br><span class="line">@implementation ZZYObject2</span><br><span class="line"></span><br><span class="line">@synthesize myName = _myName;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="https://www.jianshu.com/p/94fb8b816147" target="_blank" rel="noopener">属性覆盖</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/protocol属性/" rel="tag"># protocol属性</a>
+          
+            <a href="/tags/category属性/" rel="tag"># category属性</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/10/property详解/" rel="next" title="@property详解">
+                <i class="fa fa-chevron-left"></i> @property详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Zomfice</p>
+              <p class="site-description motion-element" itemprop="description">巧笑倩兮,美目盼兮</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#protocol属性"><span class="nav-number">1.</span> <span class="nav-text">protocol属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#category属性"><span class="nav-number">2.</span> <span class="nav-text">category属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#属性覆盖"><span class="nav-number">3.</span> <span class="nav-text">属性覆盖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zomfice</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
