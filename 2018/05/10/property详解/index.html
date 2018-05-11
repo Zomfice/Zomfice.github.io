@@ -1,6 +1,6 @@
 
  <!DOCTYPE HTML>
-<html lang="zh-Hans">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   
@@ -18,7 +18,7 @@
 <meta property="og:url" content="http://yoursite.com/2018/05/10/property详解/index.html">
 <meta property="og:site_name" content="Zomfice’s blog">
 <meta property="og:description" content="目录: 本质 修饰符 synthesize, dynamic KVO 与 Property  @property 本质： 概述: @property = ivar + getter + setter@property 其实是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境“属性” (property)作为 Objective-C 的一项特性，主">
-<meta property="og:locale" content="zh-Hans">
+<meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr67tmzavbj20ne067ab1.jpg">
 <meta property="og:image" content="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr68bazzl1j20qh0fvmzp.jpg">
 <meta property="og:updated_time" content="2018-05-10T09:36:31.897Z">
@@ -51,9 +51,9 @@
 			
 			<div id="textlogo">
 				<h1 class="site-name"><a href="/" title="Zomfice’s blog">Zomfice’s blog</a></h1>
-				<h2 class="blog-motto"></h2>
+				<h2 class="blog-motto">Zomfice的博客</h2>
 			</div>
-			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
 			</a></div>
 			<nav class="animated">
 				<ul>
@@ -69,7 +69,7 @@
  					
 					<form class="search" action="/search/index.html" method="get" accept-charset="utf-8">
 						<label>Search</label>
-						<input type="search" id="search" autocomplete="off" name="q" maxlength="20" placeholder="Search" />
+						<input type="search" id="search" autocomplete="off" name="q" maxlength="20" placeholder="搜索" />
 					</form>
 					
 					</li>
@@ -91,14 +91,14 @@
 		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
 		
   <p class="article-time">
-    <time datetime="2018-05-10T09:35:33.000Z" itemprop="datePublished"> Published 2018-05-10</time>
+    <time datetime="2018-05-10T09:35:33.000Z" itemprop="datePublished"> 发表于 2018-05-10</time>
     
   </p>
 </header>
 	<div class="article-content">
 		
 		<div id="toc" class="toc-article">
-			<strong class="toc-title">Contents</strong>
+			<strong class="toc-title">文章目录</strong>
 		
 			<ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#目录"><span class="toc-number">1.</span> <span class="toc-text">目录:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#property-本质："><span class="toc-number">2.</span> <span class="toc-text">@property 本质：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ivar，getter，setter-是什么？"><span class="toc-number">2.1.</span> <span class="toc-text">ivar，getter，setter 是什么？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#代码-property-NSString-firstName-做了什么？"><span class="toc-number">2.2.</span> <span class="toc-text">代码 @property NSString *firstName 做了什么？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#修饰符的影响："><span class="toc-number">2.3.</span> <span class="toc-text">修饰符的影响：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修饰符："><span class="toc-number">3.</span> <span class="toc-text">修饰符：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#atomic与nonatomic"><span class="toc-number">3.1.</span> <span class="toc-text">atomic与nonatomic</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#readwrite与readonly"><span class="toc-number">3.2.</span> <span class="toc-text">readwrite与readonly</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#strong与weak："><span class="toc-number">3.3.</span> <span class="toc-text">strong与weak：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#assign、copy、retain："><span class="toc-number">3.4.</span> <span class="toc-text">assign、copy、retain：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getter-setter："><span class="toc-number">3.5.</span> <span class="toc-text">getter setter：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#retain-copy-assign区别"><span class="toc-number">3.6.</span> <span class="toc-text">retain, copy, assign区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#nonnull，nullablenull-resettable，-Null-unspecified："><span class="toc-number">3.7.</span> <span class="toc-text">nonnull，nullablenull_resettable，_Null_unspecified：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#assign-与-weak-比较："><span class="toc-number">3.8.</span> <span class="toc-text">assign 与 weak 比较：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#synthesize和-dynamic"><span class="toc-number">3.9.</span> <span class="toc-text">@synthesize和@dynamic</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#synthesize：自动合成"><span class="toc-number">3.10.</span> <span class="toc-text">@synthesize：自动合成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#dynamic：禁止自动合成"><span class="toc-number">3.11.</span> <span class="toc-text">@dynamic：禁止自动合成</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#KVO："><span class="toc-number">4.</span> <span class="toc-text">KVO：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#什么是KVO？"><span class="toc-number">4.1.</span> <span class="toc-text">什么是KVO？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#KVO-触发："><span class="toc-number">4.2.</span> <span class="toc-text">KVO 触发：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#手动触发-KVO："><span class="toc-number">4.3.</span> <span class="toc-text">手动触发 KVO：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#手动触发-KVO-使用场景："><span class="toc-number">4.4.</span> <span class="toc-text">手动触发 KVO 使用场景：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#KVO-实现原理（Apple的实现）"><span class="toc-number">4.5.</span> <span class="toc-text">KVO 实现原理（Apple的实现）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考："><span class="toc-number">5.</span> <span class="toc-text">参考：</span></a></li></ol>
 		
@@ -410,17 +410,17 @@
 
 
 </div>  
-      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 
   <div id="toc" class="toc-aside">
-  <strong class="toc-title">Contents</strong>
+  <strong class="toc-title">文章目录</strong>
  
  <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#目录"><span class="toc-number">1.</span> <span class="toc-text">目录:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#property-本质："><span class="toc-number">2.</span> <span class="toc-text">@property 本质：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ivar，getter，setter-是什么？"><span class="toc-number">2.1.</span> <span class="toc-text">ivar，getter，setter 是什么？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#代码-property-NSString-firstName-做了什么？"><span class="toc-number">2.2.</span> <span class="toc-text">代码 @property NSString *firstName 做了什么？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#修饰符的影响："><span class="toc-number">2.3.</span> <span class="toc-text">修饰符的影响：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#修饰符："><span class="toc-number">3.</span> <span class="toc-text">修饰符：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#atomic与nonatomic"><span class="toc-number">3.1.</span> <span class="toc-text">atomic与nonatomic</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#readwrite与readonly"><span class="toc-number">3.2.</span> <span class="toc-text">readwrite与readonly</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#strong与weak："><span class="toc-number">3.3.</span> <span class="toc-text">strong与weak：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#assign、copy、retain："><span class="toc-number">3.4.</span> <span class="toc-text">assign、copy、retain：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getter-setter："><span class="toc-number">3.5.</span> <span class="toc-text">getter setter：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#retain-copy-assign区别"><span class="toc-number">3.6.</span> <span class="toc-text">retain, copy, assign区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#nonnull，nullablenull-resettable，-Null-unspecified："><span class="toc-number">3.7.</span> <span class="toc-text">nonnull，nullablenull_resettable，_Null_unspecified：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#assign-与-weak-比较："><span class="toc-number">3.8.</span> <span class="toc-text">assign 与 weak 比较：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#synthesize和-dynamic"><span class="toc-number">3.9.</span> <span class="toc-text">@synthesize和@dynamic</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#synthesize：自动合成"><span class="toc-number">3.10.</span> <span class="toc-text">@synthesize：自动合成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#dynamic：禁止自动合成"><span class="toc-number">3.11.</span> <span class="toc-text">@dynamic：禁止自动合成</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#KVO："><span class="toc-number">4.</span> <span class="toc-text">KVO：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#什么是KVO？"><span class="toc-number">4.1.</span> <span class="toc-text">什么是KVO？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#KVO-触发："><span class="toc-number">4.2.</span> <span class="toc-text">KVO 触发：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#手动触发-KVO："><span class="toc-number">4.3.</span> <span class="toc-text">手动触发 KVO：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#手动触发-KVO-使用场景："><span class="toc-number">4.4.</span> <span class="toc-text">手动触发 KVO 使用场景：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#KVO-实现原理（Apple的实现）"><span class="toc-number">4.5.</span> <span class="toc-text">KVO 实现原理（Apple的实现）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考："><span class="toc-number">5.</span> <span class="toc-text">参考：</span></a></li></ol>
  
   </div>
 
 <div id="asidepart">
-<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
 
   
@@ -428,7 +428,7 @@
 
   
 <div class="categorieslist">
-	<p class="asidetitle">Categories</p>
+	<p class="asidetitle">分类</p>
 		<ul>
 		
 		  
@@ -453,7 +453,7 @@
 
   
 <div class="tagslist">
-	<p class="asidetitle">Tags</p>
+	<p class="asidetitle">标签</p>
 		<ul class="clearfix">
 		
 			
@@ -517,7 +517,7 @@
 
 
   <div class="linkslist">
-  <p class="asidetitle">Links</p>
+  <p class="asidetitle">友情链接</p>
     <ul>
         
           <li>
@@ -539,7 +539,7 @@
 
 
   <div class="rsspart">
-	<a href="/atom.xml" target="_blank" title="rss">RSS</a>
+	<a href="/atom.xml" target="_blank" title="rss">RSS 订阅</a>
 </div>
 
 </aside>
@@ -740,7 +740,7 @@ var _hmt = _hmt || [];
 <!-- Totop Begin -->
 
 	<div id="totop">
-	<a title="Back to Top"><img src="/img/scrollup.png"/></a>
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
 	</div>
 	<script src="/js/totop.js"></script>
 
