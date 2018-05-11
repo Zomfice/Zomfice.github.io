@@ -4,10 +4,10 @@
 
 # Site
 title: Zomfice’s blog
-subtitle:
+subtitle: Zomfice的博客
 description: 巧笑倩兮,美目盼兮
 author: Zomfice
-language: zh-Hans
+language: zh-CN ##zh-Hans
 timezone:
 
 # URL
@@ -22,6 +22,7 @@ source_dir: source
 public_dir: public
 tag_dir: tags
 archive_dir: archives
+about_dir: about
 category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang

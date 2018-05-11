@@ -157,6 +157,16 @@ hexo常用命令
 * [hexo主题配置](http://theme-next.iissnan.com/theme-settings.html)
 * [hexo更换主题、删除文章](http://oakland.github.io/2016/04/30/hexo-%E5%A6%82%E4%BD%95%E6%9B%B4%E6%8D%A2%E4%B8%BB%E9%A2%98%E3%80%81%E5%88%A0%E9%99%A4%E6%96%87%E7%AB%A0/)
 
+##### 19. 更换Jacman主题
+
+* [如何使用 Jacman 主题](http://jacman.wuchong.me/2014/11/20/how-to-use-jacman/)
+* [Hexo个性化设置](http://blog.rookiehacker.org/2017/01/28/hexo-themes/#RSS%E8%AE%A2%E9%98%85)
+* [关闭评论](https://www.jianshu.com/p/c4364a95f7a0)
+
+* [隐藏footerView](https://www.jianshu.com/p/f054333ac9e6)
+
+* [hexo禁用特定文章评论](https://blog.csdn.net/jiluben/article/details/40868981)
+
 ## 主要参考文档
 
 * [创建](https://www.jianshu.com/p/dd9244bbc550)
