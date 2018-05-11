@@ -76,1470 +76,249 @@
     <div id="container">
       <div id="main">
 
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/05/10/protocol属性-category属性-覆盖属性/" title="protocol属性 category属性 覆盖属性" itemprop="url">protocol属性 category属性 覆盖属性</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-05-10T09:37:21.000Z" itemprop="datePublished"> Published 2018-05-10</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="protocol属性"><a href="#protocol属性" class="headerlink" title="protocol属性"></a>protocol属性</h3><blockquote>
-<p>protocol属性只有对应的set/get方法声明,没有对应成员变量,因为协议中只可以声明方法，分类中只能声明方法和对应的实现。</p>
-</blockquote>
-<p>详解: 在protocol中,通过查看runtime源码,没有Ivar实例变量,@property只是对set/get方法声明</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@interface Protocol : Object</span><br><span class="line">&#123;</span><br><span class="line">@private</span><br><span class="line">    char *protocol_name OBJC2_UNAVAILABLE;</span><br><span class="line">    struct objc_protocol_list *protocol_list OBJC2_UNAVAILABLE;</span><br><span class="line">    struct objc_method_description_list *instance_methods OBJC2_UNAVAILABLE;</span><br><span class="line">    struct objc_method_description_list *class_methods OBJC2_UNAVAILABLE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>由于遵守协议的类中，存取器的生成只是根据成员变量而生成的。而在协议中没有成员变量存在，所有就没有对应的set/get方法实现。而synthesize 实例变量 = _实例变量,系统会自动生成实例变量,也会生成set/get方法。</p>
-<p>注:(解释为什么分类和协议中无法自动生成实例变量和set/get方法)</p>
-<p>如果已经手动实现了get和set方法的话Xcode不会再自动生成带有下划线的私有成 员变量了<br>因为xCode自动生成成员变量的目的就是为了根据成员变量而生成get/set方法的<br>但是如果get和set方法缺一个的话都会生成带下划线的变量<a href="https://www.jianshu.com/p/cee2e058ce82" target="_blank" rel="noopener">详情查看</a></p>
-<ol>
-<li>定义一个mmNum属性,重写get/set方法,如果写@synthesize mmNum = _mmNum;将会 Use of undeclared identifier ‘_mmNum’;did you mean ‘mmNum’</li>
-</ol>
-<p>通过clang将.m文件转成cpp.之后看到有set/get方法,但是没有实例变量存在</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">clang -rewrite-objc MM.m</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">static void _I_MM_setMmNum_(MM * self, SEL _cmd, int mmNum) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static int _I_MM_mmNum(MM * self, SEL _cmd) &#123;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当加上@synthesize mmNum = _mmNum;可以看到实例变量生成,同时@synthesize将set/get方法作用实例变量</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// @interface MM ()&lt;MMProtocol&gt;</span><br><span class="line">// @property (nonatomic,assign) int mmNum;</span><br><span class="line">/* @end */</span><br><span class="line"></span><br><span class="line">// @implementation MM</span><br><span class="line">// @synthesize mmNum = _mmNum;</span><br><span class="line"></span><br><span class="line">struct MM_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	int _mmNum;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">static struct /*_ivar_list_t*/ &#123;</span><br><span class="line">	unsigned int entsize;  // sizeof(struct _prop_t)</span><br><span class="line">	unsigned int count;</span><br><span class="line">	struct _ivar_t ivar_list[1];</span><br><span class="line">&#125; _OBJC_$_INSTANCE_VARIABLES_MM __attribute__ ((used, section (&quot;__DATA,__objc_const&quot;))) = &#123;</span><br><span class="line">	sizeof(_ivar_t),</span><br><span class="line">	1,</span><br><span class="line">	&#123;&#123;(unsigned long int *)&amp;OBJC_IVAR_$_MM$_mmNum, &quot;_mmNum&quot;, &quot;i&quot;, 2, 4&#125;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>在Protocol定义属性,只是对set/get方法声明,不加synthesize的时候,类中是没有对应的实例变量和方法实现的。当我们添加对应的@synthesize 属性 = _属性的时候,发现方法实现</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">extern &quot;C&quot; unsigned long OBJC_IVAR_$_MM$_proNum;</span><br><span class="line">struct MM_IMPL &#123;</span><br><span class="line">	struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">	int _mmNum;</span><br><span class="line">	int _proNum;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">static int _I_MM_proNum(MM * self, SEL _cmd) &#123; return (*(int *)((char *)self + OBJC_IVAR_$_MM$_proNum)); &#125;</span><br><span class="line">static void _I_MM_setProNum_(MM * self, SEL _cmd, int proNum) &#123; (*(int *)((char *)self + OBJC_IVAR_$_MM$_proNum)) = proNum; &#125;</span><br><span class="line"></span><br><span class="line">static struct /*_ivar_list_t*/ &#123;</span><br><span class="line">	unsigned int entsize;  // sizeof(struct _prop_t)</span><br><span class="line">	unsigned int count;</span><br><span class="line">	struct _ivar_t ivar_list[2];</span><br><span class="line">&#125; _OBJC_$_INSTANCE_VARIABLES_MM __attribute__ ((used, section (&quot;__DATA,__objc_const&quot;))) = &#123;</span><br><span class="line">	sizeof(_ivar_t),</span><br><span class="line">	2,</span><br><span class="line">	&#123;&#123;(unsigned long int *)&amp;OBJC_IVAR_$_MM$_mmNum, &quot;_mmNum&quot;, &quot;i&quot;, 2, 4&#125;,</span><br><span class="line">	 &#123;(unsigned long int *)&amp;OBJC_IVAR_$_MM$_proNum, &quot;_proNum&quot;, &quot;i&quot;, 2, 4&#125;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>结论:推断结论是,属性的set/get方法是根据实例变量来实现,由于protocol没有ivars实例变量对象,所以,protocol中的属性,只是相当于set/get方法声明,而要实现set/get方法,需要指定相应的实例变量,以此来让编译器去生成get/set方法。</p>
-<h3 id="category属性"><a href="#category属性" class="headerlink" title="category属性"></a>category属性</h3><p>分类中添加属性,由于分类中只能声明方法和实习方法,不能生成实例变量,所以分类中不能自动生成set/get方法,而且需要运行时去关联方法和对象,runtime源码中</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct category_t &#123;</span><br><span class="line">    const char *name;</span><br><span class="line">    classref_t cls;</span><br><span class="line">    struct method_list_t *instanceMethods;</span><br><span class="line">    struct method_list_t *classMethods;</span><br><span class="line">    struct protocol_list_t *protocols;</span><br><span class="line">    struct property_list_t *instanceProperties;</span><br><span class="line">    // Fields below this point are not always present on disk.</span><br><span class="line">    struct property_list_t *_classProperties;</span><br><span class="line"></span><br><span class="line">    method_list_t *methodsForMeta(bool isMeta) &#123;</span><br><span class="line">        if (isMeta) return classMethods;</span><br><span class="line">        else return instanceMethods;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    property_list_t *propertiesForMeta(bool isMeta, struct header_info *hi);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>分类中添加属性举例:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@interface NSObject (Extension)</span><br><span class="line">@property (nonatomic,strong) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">#import &lt;objc/runtime.h&gt;</span><br><span class="line">@implementation NSObject (Extension)</span><br><span class="line">- (NSString *)myTitle &#123;</span><br><span class="line">    return objc_getAssociatedObject(self, @selector(myTitle));   </span><br><span class="line">&#125;</span><br><span class="line">- (void)setMyTitle:(NSString *)myTitle &#123;</span><br><span class="line">    objc_setAssociatedObject(self, @selector(myTitle), myTitle,OBJC_ASSOCIATION_RETAIN);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h3 id="属性覆盖"><a href="#属性覆盖" class="headerlink" title="属性覆盖"></a>属性覆盖</h3><ul>
-<li>首先看一个例子：ZZYObject2是ZZYObject1的字类，它们都有一个同样的属性myName</li>
-</ul>
-<p>类ZZYObject1的代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line"></span><br><span class="line">@interface ZZYObject1 : NSObject</span><br><span class="line"></span><br><span class="line">@property(nonatomic,copy)NSString* myName;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">#import &quot;ZZYObject1.h&quot;</span><br><span class="line"></span><br><span class="line">@implementation ZZYObject1</span><br><span class="line"></span><br><span class="line">-(void)setMyName:(NSString *)myName&#123;</span><br><span class="line">    _myName = @&quot;我是ZZYObject1的set 方法&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
-<p>类ZZYObject2的代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &quot;ZZYObject1.h&quot;</span><br><span class="line"></span><br><span class="line">@interface ZZYObject2 : ZZYObject1</span><br><span class="line"></span><br><span class="line">@property(nonatomic,copy)NSString* myName;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">#import &quot;ZZYObject2.h&quot;</span><br><span class="line"></span><br><span class="line">@implementation ZZYObject2</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
-<p>在ViewController调用代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &quot;ViewController.h&quot;</span><br><span class="line">#import &quot;ZZYObject2.h&quot;</span><br><span class="line"></span><br><span class="line">@interface ViewController ()</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation ViewController</span><br><span class="line"></span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    ZZYObject2*z2 = [[ZZYObject2 alloc]init];</span><br><span class="line">    z2.myName = @&quot;dsada&quot;;</span><br><span class="line">    NSLog(@&quot;我set了ZZYObject2 %@&quot;,z2.myName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>我们发现：ZZYObject2中的@property(nonatomic,copy)NSString* myName;这句代码有警告：“ Auto property synthesis will not synthesize property ‘myName’; it will be implemented by its superclass, use @dynamic to acknowledge intention”。上面打印的结果为：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2017-02-24 11:02:14.389732 FugaiShuXing[10620:3285829] 我是ZZYObject1的set 方法</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>上面打印的并不是我们想要的结果，上面走的是父类ZZYObject1的set方法。原来在子类覆盖父类的属性时，编译器不会为子类合成带下划线的实例变量以及setter和getter方法，则需要自己来实现这些东西，否则这个属性将由父类实现，也就是说如果子类没有手写set和get方法，声明的@property相当于没写。</p>
-</li>
-<li><p>我们在ZZYObject2实现文件的代码加上一句@synthesize myName = _myName;（或者用“@dynamic完全接管property的方式”也可以，当然正如上面的警告系统也是推荐的@dynamic）就可以了。</p>
-</li>
-</ul>
-<p>注：@dynamic完全接管property的方式，可参考应用场景1或2更正后的写法</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &quot;ZZYObject2.h&quot;</span><br><span class="line"></span><br><span class="line">@implementation ZZYObject2</span><br><span class="line"></span><br><span class="line">@synthesize myName = _myName;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
-<li><a href="https://www.jianshu.com/p/94fb8b816147" target="_blank" rel="noopener">属性覆盖</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/OC/">OC</a>
-</div>
-
-
-  <div class="article-tags">
   
-  <span></span> <a href="/tags/protocol属性/">protocol属性</a><a href="/tags/category属性/">category属性</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/05/10/property详解/" title="@property详解" itemprop="url">@property详解</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-05-10T09:35:33.000Z" itemprop="datePublished"> Published 2018-05-10</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="目录"><a href="#目录" class="headerlink" title="目录:"></a>目录:</h3><ul>
-<li>本质</li>
-<li>修饰符</li>
-<li>synthesize, dynamic</li>
-<li>KVO 与 Property</li>
-</ul>
-<h3 id="property-本质："><a href="#property-本质：" class="headerlink" title="@property 本质："></a>@property 本质：</h3><blockquote>
-<p>概述: @property = ivar + getter + setter<br><br><br><br>@property 其实是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境<br><br><br>“属性” (property)作为 Objective-C 的一项特性，主要的作用就在于封装对象中的数据。 Objective-C 对象通常会把其所需要的数据保存为各种实例变量。实例变量一般通过“存取方法”(access method)来访问。其中，“获取方法” (getter)用于读取变量值，而“设置方法” (setter)用于写入变量值。这个概念已经定型，并且经由“属性”这一特性而成为<br><br>Objective-C 2.0 的一部分。 而在正规的 Objective-C 编码风格中，存取方法有着严格的命名规范。 正因为有了这种严格的命名规范，所以 Objective-C 这门语言才能根据名称自动创建出存取方法。</p>
-</blockquote>
-<h4 id="ivar，getter，setter-是什么？"><a href="#ivar，getter，setter-是什么？" class="headerlink" title="ivar，getter，setter 是什么？"></a>ivar，getter，setter 是什么？</h4><ul>
-<li><p><a href="http://blog.sunnyxx.com/2015/09/13/class-ivar-layout/" target="_blank" rel="noopener">ivar</a>：作为变量存放的载体，是真正存放变量的（不完全正确，可能是指针），和其他语言的类下的变量含义一样</p>
-</li>
-<li><p>getter：变量访问方法。变量的访问方法都可以称之为 getter。@property 自动的生成的 getter 是根据变量名有关的。</p>
-</li>
-<li><p>setter：变量的修改/设置方法。变量的修改设置方法都可以称之为 setter。@property 自动的生成的 getter 是根据变量名有关的。</p>
-</li>
-</ul>
-<h4 id="代码-property-NSString-firstName-做了什么？"><a href="#代码-property-NSString-firstName-做了什么？" class="headerlink" title="代码 @property NSString *firstName 做了什么？"></a>代码 @property NSString *firstName 做了什么？</h4><p>前面提到 @perperty 是 ivar，getter，setter 的集合，他们的命名是有规则的。</p>
-<ul>
-<li>命名规则/规范： ivar，getter，setter</li>
-<li>ivar 名： _firstName</li>
-<li>getter 名：firstName</li>
-<li>setter 名： setFirstName</li>
-<li>其他默认行为：<br>其他的默认行为和修饰符相关的，见修饰符的影响</li>
-</ul>
-<h4 id="修饰符的影响："><a href="#修饰符的影响：" class="headerlink" title="修饰符的影响："></a>修饰符的影响：</h4><ul>
-<li>atomic：setter，getter 中添加 spinlock 来确定操作的原子性。atomaic 这个是默认行为。nonatomic 则不会添加 spinlock 相关代码</li>
-<li>readwrite：同时生成 getter，setter 方法，</li>
-<li>readonly：仅仅生成 getter</li>
-<li>strong，weak，assign：控制编译器自动添加 arc 相关代码。细节见修饰符</li>
-<li>retain, copy, assign：控制 setter 对于入参的处理。细节见修饰符</li>
-</ul>
-<p>property 与 protocol，category：</p>
-<ol>
-<li>是否可以使用？</li>
-</ol>
-<p>答：在 protocol 和 category 都可以使用</p>
-<ol>
-<li>@perperty 究竟做了什么？</li>
-</ol>
-<p>答：在 protocol 中只是声明了 setter，getter 方法；在 category 也只是声明了 setter 和 getter 方法，没有添加 ivar。</p>
-<ol>
-<li>如何在 category 中添加 变量？</li>
-</ol>
-<p>答：通过 objc_setAssociatedObject，objc_getAssociatedObject 实现添加关联变量。</p>
-<h3 id="修饰符："><a href="#修饰符：" class="headerlink" title="修饰符："></a>修饰符：</h3><p>修饰符处理的对象其实是 getter，setter，定义了编译器对于 getter，setter 的合成相关操作</p>
-<h4 id="atomic与nonatomic"><a href="#atomic与nonatomic" class="headerlink" title="atomic与nonatomic"></a>atomic与nonatomic</h4><ul>
-<li><p>atomic：默认是有该属性的，这个属性是为了保证程序在多线程情况，编译器会自动生成一些互斥加锁代码，避免该变量的读写不同步问题。</p>
-</li>
-<li><p>nonatomic：如果该对象无需考虑多线程的情况，请加入这个属性，这样会让编译器少生成一些互斥加锁代码，可以提高效率。</p>
-</li>
-</ul>
-<p>注意：</p>
-<ul>
-<li><p>针对的是指 getter，setter，而不是说 ivar</p>
-</li>
-<li><p>是通过自旋锁 SpinLock 来实现原子的。iOS 上默认是 atomic。</p>
-</li>
-</ul>
-<h4 id="readwrite与readonly"><a href="#readwrite与readonly" class="headerlink" title="readwrite与readonly"></a>readwrite与readonly</h4><ul>
-<li>readwrite：这个属性是默认的情况，会自动为你生成存取器。</li>
-<li>readonly：只生成getter不会有setter方法。</li>
-<li>readwrite、readonly这两个属性通常是用来控制成员变量的访问权限。</li>
-</ul>
-<h4 id="strong与weak："><a href="#strong与weak：" class="headerlink" title="strong与weak："></a>strong与weak：</h4><ul>
-<li><p>strong：强引用，也是我们通常说的引用，其存亡直接决定了所指向对象的存亡。如果不存在指向一个对象的引用，并且此对象不再显示在列表中，则此对象会被从内存中释放。对于引用计数而言，引用计数会增加</p>
-</li>
-<li><p>weak：弱引用，不决定对象的存亡。即使一个对象被持有无数个弱引用，只要没有强引用指向它，那么还是会被清除。引用计数不会改变，但是会把指针添加到对象的 weak table 中，为 nil 的时候将本指针也设置为 nil。</p>
-<p>  weak runtime 实现：属性 ivar 的具体设置函数，我们假定为objc_storeWeak(&amp;a, b) 函数</p>
-<p>  objc_storeWeak 函数把第二个参数–赋值对象（b）的内存地址作为键值key，将第一个参数–weak修饰的属性变量（a）的内存地址（&amp;a）作为value，注册到 weak 表中。如果第二个参数（b）为0（nil），那么把变量（a）的内存地址（&amp;a）从weak表中删除，</p>
-<p>  你可以把objc_storeWeak(&amp;a, b)理解为：objc_storeWeak(value, key)，并且当key变nil，将value置nil。</p>
-<p>  在b非nil时，a和b指向同一个内存地址，在b变nil时，a变nil。此时向a发送消息不会崩溃：在Objective-C中向nil发送消息是安全的。</p>
-</li>
-<li><p>strong与retain功能相似；weak与assign相似，只是当对象消失后weak会自动把指针变为nil;</p>
-</li>
-</ul>
-<h4 id="assign、copy、retain："><a href="#assign、copy、retain：" class="headerlink" title="assign、copy、retain："></a>assign、copy、retain：</h4><ul>
-<li><p>assign：对于基本类型，默认是该修饰符（非基本类型默认是 strong）。setter方法直接赋值，不进行任何retain操作，不改变引用计数。一般用来处理基本数据类型。</p>
-</li>
-<li><p>retain：释放旧的对象（release），将旧对象的值赋给新对象，再令新对象引用计数为1。我理解为指针的拷贝，拷贝一份原来的指针，释放原来指针指向的对象的内容，再令指针指向新的对象内容。</p>
-</li>
-<li><p>copy：与retain处理流程一样，先对旧值release，再copy出新的对象，retainCount为1.为了减少对上下文的依赖而引入的机 制。我理解为内容的拷贝，向内存申请一块空间，把原来的对象内容赋给它，令其引用计数为1。对copy属性要特别注意：被定义有copy属性的对象必须要 符合NSCopying协议，必须实现- (id)copyWithZone:(NSZone *)zone方法。</p>
-</li>
-<li><p>拷贝有浅拷贝，深拷贝：oc 中主要表现为的 copy，mutableCopy。关于 copy 更多信息见<a href="https://www.zybuluo.com/MicroCai/note/50592" target="_blank" rel="noopener">iOS 集合的深复制与浅复制</a></p>
-</li>
-</ul>
-<div align="center"><img width="60%" src="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr67tmzavbj20ne067ab1.jpg"></div>
-
-<ul>
-<li><p>直接使用：</p>
-</li>
-<li><p>使用assign: 对基础数据类型 （NSInteger，CGFloat）和C数据类型（int, float, double, char, 等等）</p>
-</li>
-<li><p>使用copy： 对NSString</p>
-</li>
-<li><p>使用retain： 对其他NSObject和其子类</p>
-</li>
-</ul>
-<h4 id="getter-setter："><a href="#getter-setter：" class="headerlink" title="getter setter："></a>getter setter：</h4><ul>
-<li>getter：是用来指定get方法的方法名</li>
-<li><p>setter：是用来指定set访求的方法名<br>在@property的属性中，如果这个属性是一个BOOL值，通常我们可以用getter来定义一个自己喜欢的名字，例如：</p>
-</li>
-<li><p>@property (nonatomic, assign, getter=isValue) boolean value;</p>
-</li>
-<li>@property (nonatomic, assign, setter=setIsValue) boolean value;</li>
-</ul>
-<h4 id="retain-copy-assign区别"><a href="#retain-copy-assign区别" class="headerlink" title="retain, copy, assign区别"></a>retain, copy, assign区别</h4><p>在 OC 中的内存管理的本质其实是通过引用计数来完成的，每个对象都有一个记录当前对象引用的次数，当引用次数为0的时候，才会去释放对象。 下面假设有新产生一个对象，a 作为指向这个对象的变量（指针），现将 a 使用不同的方式复制给 变量 b，</p>
-<ul>
-<li>assign： a 和 b指向同一块内存。assign 指示引用计数不增加，当前对象的引用计数依然为 1。而当 a 设置为 nil 的时候，由于引用计数变为 0，对象已经被释放，而 b 完全不知道，已经指向原来对象的地址，而原来的对象已经被是释放了，b 成为野指针。那么b在使用这块内存的时候会引起程序crash掉。</li>
-<li>retain： 在将 a 赋值给 b 的时候，a 和 b 都是指向同一个对象，该对象引用计数会 +1，变为 2。所以即使在 a = nil 的时候，对象的引用计数为1，所以依然不会释放，所以访问不会出现问题。在 b = nil 的时候，引用计数才会 0，才会被释放。</li>
-<li>copy：和上面 assign 和 retain 完全不同。assign 和 retain都是指向同一个对象，也就是共享一块内存。而 copy 指示，在复制的时候，并不是简单的赋值，而是拷贝原来的对象，然后将 b，指向这个拷贝生成的对象。由于 a 和 b 是两个不同的对象，仅仅是在值/内容相等。a = nil，对于 b 完全没有影响。</li>
-</ul>
-<h4 id="nonnull，nullablenull-resettable，-Null-unspecified："><a href="#nonnull，nullablenull-resettable，-Null-unspecified：" class="headerlink" title="nonnull，nullablenull_resettable，_Null_unspecified："></a>nonnull，nullablenull_resettable，_Null_unspecified：</h4><ul>
-<li>nonnull：不能为空</li>
-<li>nullable：表示可以为空</li>
-<li>null_resettable:</li>
-<li>get:不能返回空</li>
-<li>set可以为空</li>
-<li>注意：如果使用null_resettable,必须 重写get方法或者set方法,处理传递的值为空的情况</li>
-<li>_Null_unspecified：不确定是否为空</li>
-</ul>
-<h4 id="assign-与-weak-比较："><a href="#assign-与-weak-比较：" class="headerlink" title="assign 与 weak 比较："></a>assign 与 weak 比较：</h4><ol>
-<li>修饰变量类型的区别</li>
-</ol>
-<ul>
-<li>weak 只可以修饰对象。如果修饰基本数据类型，编译器会报错-“Property with ‘weak’ attribute must be of object type”。</li>
-<li>assign 可修饰对象，和基本数据类型。当需要修饰对象类型时，MRC时代使用unsafe_unretained。当然，unsafe_unretained也可能产生野指针，所以它名字是”unsafe_”</li>
-</ul>
-<ol>
-<li>是否产生野指针的区别</li>
-</ol>
-<ul>
-<li>weak 不会产生野指针问题。因为weak修饰的对象释放后（引用计数器值为0），指针会自动被置nil，之后再向该对象发消息也不会崩溃。 weak是安全的。</li>
-<li>assign 如果修饰对象，会产生野指针问题；如果修饰基本数据类型则是安全的。修饰的对象释放后，指针不会自动被置空，此时向对象发消息会崩溃。</li>
-</ul>
-<h4 id="synthesize和-dynamic"><a href="#synthesize和-dynamic" class="headerlink" title="@synthesize和@dynamic"></a>@synthesize和@dynamic</h4><p>property 是有 ivar ，getter，setter 构成。而这两个关键字处理的的是这三者间的关系的。编译器在编译期间完成。</p>
-<h4 id="synthesize：自动合成"><a href="#synthesize：自动合成" class="headerlink" title="@synthesize：自动合成"></a>@synthesize：自动合成</h4><ul>
-<li>自动合成 getter, setter：注意名字编译器会自动检查，如果没有手动实现，会自动添加 getter，setter，如果实现了，则不做处理</li>
-<li>具体合成那些其实还和 ready write 相关修饰符相关的，默认为 readwrite</li>
-<li>指定变量名字：@synthesize firstName = _myFirstName;</li>
-<li>合成规则：假设声明为 @property NSString *firstName;</li>
-<li>变量 ivar 名字ivar 变量名称为 _firstName</li>
-<li>getter, setter：getter 变量名称为 firstName， setter 为 setFirstName</li>
-</ul>
-<p>那些情况下自动合成会失效</p>
-<ul>
-<li>同时重写了 setter 和 getter 时</li>
-<li>重写了只读属性的 getter 时</li>
-<li>使用了 @dynamic 时</li>
-<li>在 @protocol 中定义的所有属性</li>
-<li>在 category 中定义的所有属性</li>
-<li>重载的属性</li>
-</ul>
-<h4 id="dynamic：禁止自动合成"><a href="#dynamic：禁止自动合成" class="headerlink" title="@dynamic：禁止自动合成"></a>@dynamic：禁止自动合成</h4><ul>
-<li><p>禁止自动合成getter, setter：告诉编译器属性的 setter 与 getter 方法由用户自己实现，不自动生成。（当然对于 readonly 的属性只需提供 getter 即可）</p>
-</li>
-<li><p>注意：属性被声明为 @dynamic var，然后你没有提供 @setter方法和 @getter 方法，编译的时候没问题，但是当程序运行到 instance.var = someVar，由于缺 setter 方法会导致程序崩溃； 或者当运行到 someVar = var 时，由于缺 getter 方法同样会导致崩溃。编译时没问题，运行时才执行相应的方法，这就是所谓的动态绑定</p>
-</li>
-<li><p>使用场景：</p>
-</li>
-</ul>
-<p>在CoreData的NSManagedObject类使用的某些。如果你想这些情况下，声明和使用属性，但要避免缺少方法在编译时的警告，你可以使用@dynamic动态指令，而不是@synthesize合成指令。</p>
-<h3 id="KVO："><a href="#KVO：" class="headerlink" title="KVO："></a>KVO：</h3><h4 id="什么是KVO？"><a href="#什么是KVO？" class="headerlink" title="什么是KVO？"></a>什么是KVO？</h4><p>KVO（Key Value Observing, 键值观察）是Objective-C对观察者模式的实现，每次当被观察对象的某个属性值发生改变时，注册的观察者便能获得通知。<br>使用：三个基本步骤：</p>
-<ol>
-<li>注册观察者，指定被观察对象的属性：</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[obj addObserver:self forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];</span><br></pre></td></tr></table></figure>
-<p>其中，person即为被观察对象，它的name属性即为被观察的属性。</p>
-<ol>
-<li>在观察者中实现以下回调方法：</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context</span><br></pre></td></tr></table></figure>
-<ol>
-<li>移除观察者</li>
-</ol>
-<h4 id="KVO-触发："><a href="#KVO-触发：" class="headerlink" title="KVO 触发："></a>KVO 触发：</h4><p>概述：触发依赖与以下三个函数：执行顺序如下</p>
-<ol>
-<li>willChangeValueForKey: 在一个被观察属性发生改变之前调用，记录旧的值</li>
-<li>observeValueForKeyPath:ofObject:change:context: 当改变发生后，调用该函数</li>
-<li>didChangeValueForKey: 在 2 完成后执行</li>
-</ol>
-<p>触发方式分类：</p>
-<ul>
-<li>自动触发：注册KVO，在 value 发生变化的时候自动触发。property 相关属性属性默认都是自动触发的</li>
-<li>手动触发： value 的变化，通过代码控制触发。</li>
-</ul>
-<h4 id="手动触发-KVO："><a href="#手动触发-KVO：" class="headerlink" title="手动触发 KVO："></a>手动触发 KVO：</h4><ul>
-<li>手动触发 KVO，就是通知 value 变化。主要有两种情况</li>
-</ul>
-<p>property 变量：默认情况下 property 的是自动触发，手动触发方法与步骤：</p>
-<pre><code>* 重载 + (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key： key 为手动触发的 key 的返回 NO，其他调用父方法
-* 重写 setter 方法：在修改值前后分别调用，willChangeValueForKey: 和 didChangeValueForKey:
-</code></pre><ul>
-<li><p>注意：</p>
-<ul>
-<li>上面步骤缺一不可</li>
-<li>如果步骤 1 缺失, 会导致 KVO 代码执行两次</li>
-</ul>
-</li>
-<li><p>非 property 变量：对于 property 变量，编译器会自动合成 getter 和 setter，而KVO 是运行期间的，依赖与 runtime。所以KVO 对于名字有严格的要求（setter）</p>
-</li>
-<li>方法：只需要在自己的 setter 中调用 willChangeValueForKey: 和 didChangeValueForKey: 即可。</li>
-</ul>
-<h4 id="手动触发-KVO-使用场景："><a href="#手动触发-KVO-使用场景：" class="headerlink" title="手动触发 KVO 使用场景："></a>手动触发 KVO 使用场景：</h4><ul>
-<li><p>自定义 setter 实现，setter 使用其他名字</p>
-</li>
-<li><p>category 分类的添加的属性</p>
-</li>
-<li><p>使用：objc_setAssociatedObject，objc_getAssociatedObject 添加关联变量</p>
-</li>
-</ul>
-<p>关于 category 详情见 <a href="http://blog.sunnyxx.com/2014/03/05/objc_category_secret/" target="_blank" rel="noopener">objc category的秘密</a></p>
-<h4 id="KVO-实现原理（Apple的实现）"><a href="#KVO-实现原理（Apple的实现）" class="headerlink" title="KVO 实现原理（Apple的实现）"></a>KVO 实现原理（Apple的实现）</h4><p>核心：isa + setter</p>
-<p>当你观察一个对象时，一个新的类会被动态创建。这个类继承自该对象的原本的类，并重写了被观察属性的 setter 方法。重写的 setter 方法会负责在调用原 setter 方法之前和之后，通知所有观察对象：值的更改。最后通过 isa 混写（isa-swizzling） 把这个对象的 isa 指针 ( isa 指针告诉 Runtime 系统这个对象的类是什么 ) 指向这个新创建的子类，对象就神奇的变成了新创建的子类的实例</p>
-<div align="center"><img width="60%" src="https://ws1.sinaimg.cn/large/ad3a9ce5gy1fr68bazzl1j20qh0fvmzp.jpg"></div>
-
-<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><ul>
-<li><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">iOS 基础知识回顾——关于 property</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/OC/">OC</a>
-</div>
-
-
-  <div class="article-tags">
+<section class="post" itemscope itemprop="blogitem">
   
-  <span></span> <a href="/tags/property/">property</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/05/10/成员变量-实例变量-属性变量/" title="成员变量 实例变量 属性变量" itemprop="url">成员变量 实例变量 属性变量</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-05-10T09:30:15.000Z" itemprop="datePublished"> Published 2018-05-10</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="1-概念与区别："><a href="#1-概念与区别：" class="headerlink" title="1. 概念与区别："></a>1. 概念与区别：</h3><ul>
-<li>成员变量：@interface的{}中包裹的变量</li>
-</ul>
-<blockquote>
-<p>@interface xx(){“成员变量”} -&gt; { }包裹的是成员变量—基本数据类型(int/float)+实例变量(NSString)<br><br><strong>实例变量+基本数据类型变量=成员变量</strong></p>
-</blockquote>
-<ul>
-<li>属性变量：声明标识符,对set/get方法声明,并不是变量</li>
-</ul>
-<blockquote>
-<p>属性并不是变量,是Objective-C 的一项特性,是属性的声明标识符，提供成员变量的访问方法的声明、控制成员变量的访问权限、控制多线程时成员变量的访问环境,主要的作用就在于封装对象中的数据,Objective-C 对象通常会把其所需要的数据保存为各种实例变量,实例变量一般通过“存取方法”(access method)来访问。<a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">@property 本质</a></p>
-</blockquote>
-<ul>
-<li>实例变量：成员变量的一种</li>
-</ul>
-<blockquote>
-<p>成员变量一种，不包含基本数据类型，@synthesize name = _name , _name实例变量。</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@interface MM ()&#123;</span><br><span class="line">    int _age;//成员变量</span><br><span class="line">    NSString * _name;//成员变量</span><br><span class="line">&#125;</span><br><span class="line">@property (nonatomic,assign) int age;//属性,set/get方法声明,标识符 nonatomic:权限</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation MM</span><br><span class="line">@synthesize age = _age;//生成实例变量_age,生成set/get方法,并将set/get方法作用于实例变量</span><br><span class="line"></span><br><span class="line">- (void)setAge:(int)age&#123;//对_age的封装,便于子类和外部访问，同时设置访问权限等</span><br><span class="line">    _age = age;</span><br><span class="line">&#125;</span><br><span class="line">- (int)age&#123;</span><br><span class="line">    return _age;</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
-<h3 id="2-历史和关系："><a href="#2-历史和关系：" class="headerlink" title="2. 历史和关系："></a>2. 历史和关系：</h3><p><a href="https://www.jianshu.com/p/8e6606ce759d" target="_blank" rel="noopener">详情参考:IOS属性的作用</a></p>
-<h5 id="GCC"><a href="#GCC" class="headerlink" title="GCC"></a>GCC</h5><p><strong>手动声明实例变量</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">***.h***</span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">&#123;</span><br><span class="line">    //属性的实例变量</span><br><span class="line">    NSString *myTitle;</span><br><span class="line">&#125;</span><br><span class="line">//编译器遇到@property会自动声明对应的setter/getter</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">***.m***</span><br><span class="line">//编译器遇到@synthesize会自动实现setter/getter方法</span><br><span class="line">//编译器遇到@synthesize回去访问myTitle的同名变量，如果没找到就报错。</span><br><span class="line">@synthesize myTitle;</span><br></pre></td></tr></table></figure>
-<h5 id="LLVM"><a href="#LLVM" class="headerlink" title="LLVM"></a>LLVM</h5><p><strong>编译器就可以自动为属性生成一个名字带下划线的实例变量</strong></p>
-<p>属性改变步骤：</p>
-<ol>
-<li>第一版,最早版本</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">***.h***</span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">&#123;</span><br><span class="line">    NSString *myTitle;</span><br><span class="line">&#125;</span><br><span class="line">//编译器遇到@property会自动声明对应的setter/getter</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">***.m***</span><br><span class="line">//编译器遇到@synthesize会自动实现setter/getter方法</span><br><span class="line">//编译器遇到@synthesize回去访问myTitle的同名变量，如果没找到就报错。</span><br><span class="line">@synthesize myTitle;</span><br></pre></td></tr></table></figure>
-<p>2.第二版，不需要自己手动声明一个成员变量，关键字@synthesize会默认去访问myTitle的同名变量，如果找不到则会自动生成一个</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">***.h***</span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">***.m***</span><br><span class="line">/*</span><br><span class="line"> 1.编译器遇到@synthesize会自动实现setter/getter方法;</span><br><span class="line"> 2.编译器遇到@synthesize回去访问myTitle的同名变量;</span><br><span class="line"> 3.如果找不到同名的变量，会自动生成一个私有同名变量myTitle</span><br><span class="line"> 4.因此现在开始就不用再手动声明一个实例变量了，</span><br><span class="line"> */</span><br><span class="line">@synthesize myTitle;</span><br></pre></td></tr></table></figure>
-<p>3.第三版,考虑到变量名和getter的方法名、setter的参数名一样，容易让人误会，引起警告，所以默认给属性生成的同名变量名带下划线。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/*</span><br><span class="line"> 1.指定_myTitle作为myTitle的实例变量</span><br><span class="line"> 2.这样我们就可以去使用_myTitle，避免和setter名同名产生误会了</span><br><span class="line"> */</span><br><span class="line">@synthesize myTitle = _myTitle;</span><br></pre></td></tr></table></figure>
-<p>4.第四版，在IOS4.5后，也@synthesize可以省略了,最终就变成这样了</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br></pre></td></tr></table></figure>
-<p>如果我们把上面的过程全部显示出来的话，本质如下：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">**.h**</span><br><span class="line">#import &lt;UIKit/UIKit.h&gt;</span><br><span class="line"></span><br><span class="line">@interface ViewController : UIViewController</span><br><span class="line">&#123;</span><br><span class="line">/*</span><br><span class="line">***被隐藏的代码：***</span><br><span class="line">1.这个默认是@synthesize myTitle = _myTitle;生成的</span><br><span class="line">2.所以如果我们手动设置@synthesize myTitle，那么我们编译器</span><br><span class="line">  生成的变量就是NSString *myTitle,相当于@synthesize myTitle = myTitle,</span><br><span class="line">  如果设置@synthesize myTitle = youTitle，那么编译器生成的变量就是NSString *youTitle了</span><br><span class="line">  这要注意。</span><br><span class="line">*/</span><br><span class="line">    NSString *_myTitle;</span><br><span class="line">&#125;</span><br><span class="line">@property (copy, nonatomic) NSString *myTitle;</span><br><span class="line">//***被隐藏的代码***</span><br><span class="line">//编译器遇到@property会自动声明setter/getter方法</span><br><span class="line">- (void)setMyTitle:(NSString *)myTitle;</span><br><span class="line">- (NSString *)myTitle;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">**.m**</span><br><span class="line">/*</span><br><span class="line">***被隐藏的代码***</span><br><span class="line">1.@synthesize关键字会自动实现setter/getter的方法</span><br><span class="line">2.@synthesize myTitle = _myTitle指明了属性myTitle的实例变</span><br><span class="line">量是_myTitle,setter/getter操作的对象就是_myTitle.</span><br><span class="line"></span><br><span class="line">*/</span><br><span class="line">@synthesize myTitle = _myTitle;</span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">    _myTitle = @&quot;123&quot;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//***被隐藏的代码***</span><br><span class="line">//由关键字@synthesize自动实现</span><br><span class="line">- (NSString *)myTitle&#123;</span><br><span class="line">    return _myTitle;</span><br><span class="line">&#125;</span><br><span class="line">- (void)setMyTitle:(NSString *)myTitle&#123;</span><br><span class="line">    _myTitle = myTitle;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>代码说明：</p>
-<ol>
-<li>编译器遇到关键字 <code>@property</code> ，自动声明setter/getter方法。</li>
-<li>编译器遇到 <code>@synthesize</code> ,自动实现setter/getter方法。</li>
-<li><code>@synthesize myTitle = _myTitle;</code> 为属性 <code>myTitle</code> 生成了一个实例变量 <code>_myTitle</code> ,所以我们对属性的操作<code>self.myTitle</code> 实质上都是在操作<code>_myTitle</code> 变量。</li>
-</ol>
-<p><strong>所以属性、实例变量和成员变量的关系是：</strong><br>声明属性的时候编译器自动生成的实例变量，实例变量的本质就是成员变量，<code>self.myTitle</code>操作属性的时候实质上是在操作成员变量 <code>_myTitle</code> (也就是实例变量)。</p>
-<h3 id="问题："><a href="#问题：" class="headerlink" title="问题："></a>问题：</h3><ol>
-<li>我们能否认为新编译器LLVM下的@property == 老编译器GCC的 成员变量+ @property + @synthesize 成员变量呢？</li>
-</ol>
-<p>答案是否定的，<br>因为成员变量+ @property + @synthesize 成员变量的形式，编译器不会帮我们生成<em>成员变量，因此不会操作</em>成员变量了(注:区别就是LVVM操作实际是_成员变量,GCC操作成员变量,这样来说并不==)；<br>同时@synthesize 还有一个作用，可以指定与属性对应的实例变量，<br>例如@synthesize myString = xxx；<br>那么self.myString其实是操作的实例变量xxx，而非_String了。</p>
-<p><a href="https://www.jianshu.com/p/1a153b49d3bc" target="_blank" rel="noopener">详情参考:成员变量和属性的前世今生</a></p>
-<ol>
-<li>同时重写 <code>setter/getter</code> 的问题</li>
-</ol>
-<p>我们会发现，当我们同时重写 <code>setter/getter</code> 时会报错，为什么呢？这是因为当我们同时重写 <code>setter/getter</code> 时，编译器自动添加的代码<code>@synthesize myTitle = _myTitle;</code> 失效，就不会自动为我们生成实例变量<code>_myTitle</code> 了，<code>setter/getter</code> 操作的对象就不存在了。所以我们要加上<code>@synthesize myTitle = _myTitle;</code> ,手动指定setter/getter要操作的实例对象是<code>_my</code> </p>
-<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><p>注：参考价值排序</p>
-<ul>
-<li><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">1. iOS 基础知识回顾——关于 property:全</a></li>
-<li><a href="https://www.jianshu.com/p/8e6606ce759d" target="_blank" rel="noopener">2. IOS属性的作用</a></li>
-<li><a href="https://blog.csdn.net/qq_25475307/article/details/78249675" target="_blank" rel="noopener">3. 关于Objective-C中的@property以及属性分析</a></li>
-<li><a href="https://www.jianshu.com/p/1a153b49d3bc" target="_blank" rel="noopener">4. 成员变量和属性的前世今生</a></li>
-<li><a href="http://www.cnblogs.com/PSSSCode/p/5510585.html" target="_blank" rel="noopener">5. iOS Category 和 Protocol 中的 Property</a></li>
-<li><a href="https://blog.csdn.net/u012946824/article/details/51788565" target="_blank" rel="noopener">6. 解惑——iOS中成员变量和属性区别</a></li>
-<li><a href="https://www.jianshu.com/p/6c0da0af5d3e" target="_blank" rel="noopener">7. iOS 成员变量，实例变量，属性变量的区别与联系</a></li>
-<li><a href="https://www.cnblogs.com/handsomeBoys/p/5672352.html" target="_blank" rel="noopener">8. iOS 同时重写setter和getter</a></li>
-<li><a href="https://www.cnblogs.com/Jenaral/p/5970393.html" target="_blank" rel="noopener">9. iOS 成员变量，实例变量，属性变量的区别，联系</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/OC/">OC</a>
-</div>
-
-
-  <div class="article-tags">
+    <a href="/2018/05/10/protocol属性-category属性-覆盖属性/" title="protocol属性 category属性 覆盖属性" itemprop="url">
   
-  <span></span> <a href="/tags/property/">property</a><a href="/tags/Instance-ivars/">Instance ivars</a><a href="/tags/成员变量/">成员变量</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
+    <h1 itemprop="name">protocol属性 category属性 覆盖属性</h1>
     
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
+     
+           <p itemprop="description" >protocol属性
+protocol属性只有对应的set/get方法声明,没有对应成员变量,因为协议中只可以声明方法，分类中只能声明方法和对应的实现。
+
+详解: 在protocol中,通过查看runtime源码,没有Ivar实例变量,@property只是对set/get方法声</p>
+        
     
-      <a href="/2018/05/10/synthesize-dynamic详解/" title="@synthesize @dynamic详解" itemprop="url">@synthesize @dynamic详解</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-05-10T09:27:21.000Z" itemprop="datePublished"> Published 2018-05-10</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="synthesize-dynamic"><a href="#synthesize-dynamic" class="headerlink" title="@synthesize @dynamic"></a>@synthesize @dynamic</h3><blockquote>
-<p>OC最初设定@property和@synthesize的作用：<br><br><br><br> 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量)<br><br><br><br> 2. @synthesize的作用是实现属性的,如getter，setter方法。</p>
-</blockquote>
-<p>在声明属性的情况下如果重写setter,getter,方法，就需要把未识别的变量在@synthesize中定义，把属性的存取方法作用于变量。如：.h文件中</p>
-<p>后来因为使用@property灰常频繁，就简略了@synthesize的表达</p>
-<p>从Xcode4.4以后@property已经独揽了@synthesize的功能主要有三个作用：</p>
-<h3 id="synthesize三个作用："><a href="#synthesize三个作用：" class="headerlink" title="@synthesize三个作用："></a>@synthesize三个作用：</h3><ol>
-<li>生成了成员变量get/set方法的声明</li>
-<li>生成了私有的带下划线的的成员变量因此子类不可以直接访问，但是可以通过. get/set方法访问。那么如果想让定义的成员变量让子类直接访问那么只能在.h文件. 中. 定义成员变量了，因为它默认是@protected</li>
-<li>生成了get/set方法的实现</li>
-</ol>
-<p>用@property声明的成员属性,相当于自动生成了setter getter方法,如果重写了set和get方法,与@property声明的成员属性就不是一个成员属性了,是另外一个实例变量,而这个实例变量需要手动声明。所以会报错误。</p>
-<p>总结：一定要分清属性和变量的区别，不能混淆。@synthesize 声明的属性=变量。意思是，将属性的setter,getter方法，作用于这个变量。</p>
-<h3 id="synthesize：自动合成"><a href="#synthesize：自动合成" class="headerlink" title="@synthesize：自动合成"></a><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">@synthesize：自动合成</a></h3><ul>
-<li>自动合成 getter, setter：注意名字编译器会自动检查，如果没有手动实现，会自动添加 getter，setter，如果实现了，则不做处理</li>
-<li>具体合成那些其实还和 ready write 相关修饰符相关的，默认为 readwrite</li>
-<li>指定变量名字：@synthesize firstName = _myFirstName;</li>
-<li>合成规则：假设声明为 @property NSString *firstName;</li>
-<li>变量 ivar 名字ivar 变量名称为 _firstName</li>
-<li>getter, setter：getter 变量名称为 firstName， setter 为 setFirstName</li>
-</ul>
-<p>那些情况下自动合成会失效</p>
-<ul>
-<li>同时重写了 setter 和 getter 时</li>
-<li>重写了只读属性的 getter 时</li>
-<li>使用了 @dynamic 时</li>
-<li>在 @protocol 中定义的所有属性</li>
-<li>在 category 中定义的所有属性</li>
-<li>重载的属性</li>
-</ul>
-<h3 id="dynamic：禁止自动合成"><a href="#dynamic：禁止自动合成" class="headerlink" title="@dynamic：禁止自动合成"></a><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">@dynamic：禁止自动合成</a></h3><ul>
-<li><p>禁止自动合成getter, setter：告诉编译器属性的 setter 与 getter 方法由用户自己实现，不自动生成。（当然对于 readonly 的属性只需提供 getter 即可）</p>
-</li>
-<li><p>注意：属性被声明为 @dynamic var，然后你没有提供 @setter方法和 @getter 方法，编译的时候没问题，但是当程序运行到 instance.var = someVar，由于缺 setter 方法会导致程序崩溃； 或者当运行到 someVar = var 时，由于缺 getter 方法同样会导致崩溃。编译时没问题，运行时才执行相应的方法，这就是所谓的动态绑定</p>
-</li>
-<li><p>使用场景：</p>
-</li>
-</ul>
-<p>在CoreData的NSManagedObject类使用的某些。如果你想这些情况下，声明和使用属性，但要避免缺少方法在编译时的警告，你可以使用@dynamic动态指令，而不是@synthesize合成指令。</p>
-<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li>场景1</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ViewController.h</span><br><span class="line"></span><br><span class="line">#import &lt;UIKit/UIKit.h&gt;  </span><br><span class="line">  </span><br><span class="line">@interface ViewController : UIViewController&#123;</span><br><span class="line">    NSMutableDictionary* _myDic;</span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line">@property(nonatomic,strong)NSMutableDictionary*myDic; </span><br><span class="line">  </span><br><span class="line">@end  </span><br><span class="line">---------------------------------------------</span><br><span class="line">ViewController.m</span><br><span class="line"></span><br><span class="line">#import &quot;ViewController.h&quot;</span><br><span class="line"></span><br><span class="line">@interface ViewController ()</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation ViewController</span><br><span class="line"></span><br><span class="line">@dynamic myDic;//告诉别人set&amp;get都是自己重写了的</span><br><span class="line"></span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(NSMutableDictionary *)myDic&#123;</span><br><span class="line">    return _myDic;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(void)setMyDic:(NSMutableDictionary *)myDic&#123;</span><br><span class="line">    _myDic = myDic;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>场景2</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ViewController.h</span><br><span class="line"></span><br><span class="line">#import &lt;UIKit/UIKit.h&gt;  </span><br><span class="line">  </span><br><span class="line">@interface ViewController : UIViewController&#123;</span><br><span class="line">    NSMutableDictionary* _myDic;</span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line">@property(nonatomic,strong,readonly)NSMutableDictionary*myDic; //这时候外部不能调用set方法，只能子类或该类内部才能调用</span><br><span class="line">  </span><br><span class="line">@end  </span><br><span class="line">---------------------------------------------</span><br><span class="line">ViewController.m</span><br><span class="line"></span><br><span class="line">#import &quot;ViewController.h&quot;</span><br><span class="line"></span><br><span class="line">@interface ViewController ()</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation ViewController</span><br><span class="line"></span><br><span class="line">@dynamic myDic;//告诉别人set&amp;get都是自己重写了的</span><br><span class="line"></span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(NSMutableDictionary *)myDic&#123;</span><br><span class="line">    return _myDic;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(void)setMyDic:(NSMutableDictionary *)myDic&#123;</span><br><span class="line">    _myDic = myDic;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>场景3 @synthesize还可以用来自定义Property所对应的ivar的名称。例子如下：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#import &lt;UIKit/UIKit.h&gt;</span><br><span class="line"></span><br><span class="line">@interface ZZYObject : UIView</span><br><span class="line"></span><br><span class="line">@property(nonatomic,strong)NSMutableDictionary*myDic;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">-----------------------------</span><br><span class="line"></span><br><span class="line">#import &quot;ZZYObject.h&quot;</span><br><span class="line"></span><br><span class="line">@interface ZZYObject()</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation ZZYObject</span><br><span class="line"></span><br><span class="line">@synthesize myDic = myDicssss;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-(NSMutableDictionary *)myDic&#123;</span><br><span class="line">    return myDicssss;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(void)setMyDic:(NSMutableDictionary *)myDic&#123;</span><br><span class="line">    myDicssss = myDic;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>场景4:在protocol中声明属性</p>
-</li>
-<li><p>场景5 <a href="http://blog.csdn.net/jeffasd/article/details/50475608" target="_blank" rel="noopener">覆盖属性参考：</a></p>
-</li>
-</ul>
-<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><ul>
-<li><a href="https://www.cnblogs.com/handsomeBoys/p/5672352.html" target="_blank" rel="noopener">1. synthesize详解</a></li>
-<li><a href="https://www.jianshu.com/p/94fb8b816147" target="_blank" rel="noopener">2. @synthesize应用场景详解</a></li>
-<li><a href="https://www.jianshu.com/p/294e9285361e" target="_blank" rel="noopener">3. 自动合成和禁止</a></li>
-<li><a href="https://www.jianshu.com/p/cee2e058ce82" target="_blank" rel="noopener">4. @synthesize的妙用</a></li>
-<li><a href="http://nextcocoa.com/synthesize-de-zuo-yong/" target="_blank" rel="noopener">5. @synthesize 的作用</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/OC/">OC</a>
-</div>
+    <time datetime="2018-05-10T09:37:21.000Z" itemprop="datePublished">2018-05-10</time>
+  </a>
+</section>
 
 
-  <div class="article-tags">
+
+
+
+
   
-  <span></span> <a href="/tags/synthesize/">synthesize</a><a href="/tags/dynamic/">dynamic</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/04/23/bridge，-bridge-transfer和-bridge-retained详解/" title="__bridge，__bridge_transfer和__bridge_retained详解" itemprop="url">__bridge，__bridge_transfer和__bridge_retained详解</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-04-23T09:17:48.000Z" itemprop="datePublished"> Published 2018-04-23</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="Objective-C和Core-Foundation-对象相互转换的内存管理总结"><a href="#Objective-C和Core-Foundation-对象相互转换的内存管理总结" class="headerlink" title="Objective-C和Core Foundation 对象相互转换的内存管理总结"></a><a href="http://www.cnblogs.com/HypeCheng/p/4686503.html" target="_blank" rel="noopener">Objective-C和Core Foundation 对象相互转换的内存管理总结</a></h3><p>iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力： [cpp] view plaincopyprint? 01. CFStringRef aCFString = (CFStringRef)aNSString; 02. NSString *aNSS</p>
-<p>iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. CFStringRef aCFString = (CFStringRef)aNSString;  </span><br><span class="line">02. NSString *aNSString = (NSString *)aCFString;</span><br></pre></td></tr></table></figure>
-<p>针对内存管理问题，ARC 可以帮忙管理 Objective-C 对象, 但是不支持 Core Foundation 对象的管理，所以转换后要注意一个问题：谁来释放使用后的对象。 本文重点总结一下类型转换后的内存管理。</p>
-<h5 id="一、非ARC的内存管理"><a href="#一、非ARC的内存管理" class="headerlink" title="一、非ARC的内存管理"></a>一、非ARC的内存管理</h5><p>倘若不使用ARC，手动管理内存，思路比较清晰，使用完，release转换后的对象即可。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. //NSString 转 CFStringRef   </span><br><span class="line">02. CFStringRef aCFString = (CFStringRef) [[NSString alloc] initWithFormat:@&quot;%@&quot;, string];  </span><br><span class="line">03. //...   </span><br><span class="line">04. CFRelease(aCFString);  </span><br><span class="line">05.  </span><br><span class="line">06.  </span><br><span class="line">07. //CFStringRef 转 NSString   </span><br><span class="line">08. CFStringRef aCFString = CFStringCreateWithCString(kCFAllocatorDefault,  </span><br><span class="line">09.                                                  bytes,  </span><br><span class="line">10.                                                  NSUTF8StringEncoding);  </span><br><span class="line">11. NSString *aNSString = (NSString *)aCFString;  </span><br><span class="line">12. //...   </span><br><span class="line">13. [aNSString release];</span><br></pre></td></tr></table></figure>
-<h5 id="二、ARC下的内存管理"><a href="#二、ARC下的内存管理" class="headerlink" title="二、ARC下的内存管理"></a>二、ARC下的内存管理</h5><p>ARC的诞生大大简化了我们针对内存管理的开发工作，但是只支持管理 Objective-C 对象, 不支持 Core Foundation 对象。Core Foundation 对象必须使用CFRetain和CFRelease来进行内存管理。那么当使用Objective-C 和 Core Foundation 对象相互转换的时候，必须让编译器知道，到底由谁来负责释放对象，是否交给ARC处理。只有正确的处理，才能避免内存泄漏和double free导致程序崩溃。</p>
-<p>根据不同需求，有3种转换方式</p>
-<ul>
-<li>__bridge                                           （不改变对象所有权）</li>
-<li>__bridge_retained 或者 CFBridgingRetain()           （解除 ARC 所有权）</li>
-<li>__bridge_transfer 或者 CFBridgingRelease()          （给予 ARC 所有权） </li>
-</ul>
-<p><strong>1. __bridge_retained 或者 CFBridgingRetain()</strong></p>
-<p>__bridge_retained 或者 CFBridgingRetain()  将Objective-C对象转换为Core Foundation对象，把对象所有权桥接给Core Foundation对象，同时剥夺ARC的管理权，后续需要开发者使用CFRelease或者相关方法手动来释放对象。</p>
-<p>例子：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02. &#123;  </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     NSString *aNSString = [[NSString alloc]initWithFormat:@&quot;test&quot;];  </span><br><span class="line">06.     CFStringRef aCFString = (__bridge_retained CFStringRef) aNSString;  </span><br><span class="line">07.      </span><br><span class="line">08.     (void)aCFString;  </span><br><span class="line">09.      </span><br><span class="line">10.     //正确的做法应该执行CFRelease   </span><br><span class="line">11.     //CFRelease(aCFString);    </span><br><span class="line">12.&#125;</span><br></pre></td></tr></table></figure>
-<p>程序没有执行CFRelease，造成内存泄漏：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CFBridgingRetain()  是 __bridge_retained 的宏方法，下面两行代码等价：</span><br><span class="line"></span><br><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. CFStringRef aCFString = (__bridge_retained CFStringRef) aNSString;  </span><br><span class="line">02. CFStringRef aCFString = (CFStringRef) CFBridgingRetain(aNSString);</span><br></pre></td></tr></table></figure>
-<p><strong>2. __bridge_transfer 或者 CFBridgingRelease()</strong></p>
-<p>__bridge_transfer 或者 CFBridgingRelease()  将非Objective-C对象转换为Objective-C对象，同时将对象的管理权交给ARC，开发者无需手动管理内存。</p>
-<p>接着上面那个内存泄漏的例子，再转成OC对象交给ARC来管理内存，无需手动管理，也不会出现内存泄漏：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02. &#123;  </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     NSString *aNSString = [[NSString alloc]initWithFormat:@&quot;test&quot;];  </span><br><span class="line">06.     CFStringRef aCFString = (__bridge_retained CFStringRef) aNSString;  </span><br><span class="line">07.     aNSString = (__bridge_transfer NSString *)aCFString;  </span><br><span class="line">08. &#125;</span><br></pre></td></tr></table></figure>
-<p>CFBridgingRelease() 是__bridge_transfer的宏方法，下面两行代码等价：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. aNSString = (__bridge_transfer NSString *)aCFString;  </span><br><span class="line">02. aNSString = (NSString *)CFBridgingRelease(aCFString);</span><br></pre></td></tr></table></figure>
-<p><strong>3. __bridge</strong></p>
-<p>__bridge 只做类型转换，不改变对象所有权，是我们最常用的转换符。</p>
-<p>从OC转CF，ARC管理内存：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02. &#123;  </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     NSString *aNSString = [[NSString alloc]initWithFormat:@&quot;test&quot;];  </span><br><span class="line">06.     CFStringRef aCFString = (__bridge CFStringRef)aNSString;  </span><br><span class="line">07.      </span><br><span class="line">08.     (void)aCFString;  </span><br><span class="line">09. &#125;</span><br></pre></td></tr></table></figure>
-<p>从CF转OC，需要开发者手动释放，不归ARC管：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    [cpp] view plaincopyprint?</span><br><span class="line">01. - (void)viewDidLoad  </span><br><span class="line">02.   </span><br><span class="line">03.     [super viewDidLoad];  </span><br><span class="line">04.      </span><br><span class="line">05.     CFStringRef aCFString = CFStringCreateWithCString(NULL, &quot;test&quot;, kCFStringEncodingASCII);  </span><br><span class="line">06.     NSString *aNSString = (__bridge NSString *)aCFString;  </span><br><span class="line">07.      </span><br><span class="line">08.     (void)aNSString;  </span><br><span class="line">09.      </span><br><span class="line">10.     CFRelease(aCFString);  </span><br><span class="line">11. &#125;</span><br></pre></td></tr></table></figure>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考:"></a>参考:</h4><ul>
-<li><a href="http://www.cnblogs.com/HypeCheng/p/4686503.html" target="_blank" rel="noopener">Objective-C和Core Foundation 对象相互转换的内存管理总结</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/OC/">OC</a>
-</div>
-
-
-  <div class="article-tags">
+<section class="post" itemscope itemprop="blogitem">
   
-  <span></span> <a href="/tags/bridge/">bridge</a><a href="/tags/bridge-transfer/">bridge_transfer</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/04/04/C-语言中结构体的定义和使用/" title="C 语言中结构体的定义和使用" itemprop="url">C 语言中结构体的定义和使用</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-04-04T06:19:16.000Z" itemprop="datePublished"> Published 2018-04-04</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h3 id="1-声明"><a href="#1-声明" class="headerlink" title="1. 声明"></a>1. 声明</h3><p>一般形式</p>
-<p>struct 结构名{ </p>
-<p>成员列表 </p>
-<p>};<br>struct关键字表示接下来是一个结构</p>
-<p>如：声明一个学生的结构</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student&#123;         //声明结构体</span><br><span class="line">    char name[20];      //姓名</span><br><span class="line">    int num;            //学号</span><br><span class="line">    float score;        //成绩</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h3 id="2-定义"><a href="#2-定义" class="headerlink" title="2. 定义"></a>2. 定义</h3><p>struct 结构体名 结构体变量名; </p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student stu1;    //定义结构体变量</span><br></pre></td></tr></table></figure>
-<h4 id="1-结构体变量的定义可以放在结构体的声明之后"><a href="#1-结构体变量的定义可以放在结构体的声明之后" class="headerlink" title="1. 结构体变量的定义可以放在结构体的声明之后:"></a>1. 结构体变量的定义可以放在结构体的声明之后:</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student&#123;         //声明结构体</span><br><span class="line">    char name[20];      //姓名</span><br><span class="line">    int num;            //学号</span><br><span class="line">    float score;        //成绩</span><br><span class="line">&#125;;</span><br><span class="line">struct Student stu1;    //定义结构体变量</span><br></pre></td></tr></table></figure>
-<h4 id="2-结构体变量的定义也可以与结构体的声明同时"><a href="#2-结构体变量的定义也可以与结构体的声明同时" class="headerlink" title="2. 结构体变量的定义也可以与结构体的声明同时"></a>2. 结构体变量的定义也可以与结构体的声明同时</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student&#123;        </span><br><span class="line">    char name[20];       </span><br><span class="line">    int num;             </span><br><span class="line">    float score;         </span><br><span class="line">&#125;stu1;                  //在定义之后跟变量名</span><br></pre></td></tr></table></figure>
-<h4 id="3-可以使用匿名结构体来定义结构体变量"><a href="#3-可以使用匿名结构体来定义结构体变量" class="headerlink" title="3. 可以使用匿名结构体来定义结构体变量"></a>3. 可以使用匿名结构体来定义结构体变量</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct &#123;                //没有结构名</span><br><span class="line">    char name[20];       </span><br><span class="line">    int num;            </span><br><span class="line">    float score;         </span><br><span class="line">&#125;stu1;</span><br></pre></td></tr></table></figure>
-<h3 id="3-访问"><a href="#3-访问" class="headerlink" title="3. 访问"></a>3. 访问</h3><p>虽然结构类似一个数组，只是数组元素的数据类型是相同的，而结构中元素的数据类型是可以不同的。但结构不能像数组那样使用下标去访问其中的各个元素，而应该用结构成员运算符点（.）。即访问成员的一般形式是：<br>结构变量名 . 成员名<br>如 stu1 . name 表示学生stu1的姓名。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Birthday&#123;                //声明结构体 Birthday</span><br><span class="line">    int year;</span><br><span class="line">    int month;</span><br><span class="line">    int day;</span><br><span class="line">&#125;;</span><br><span class="line">struct Student&#123;                 //声明结构体 Student</span><br><span class="line">    char name[20];              </span><br><span class="line">    int num;                    </span><br><span class="line">    float score;                 </span><br><span class="line">    struct Birthday birthday;   //生日</span><br><span class="line">&#125;stu1;</span><br></pre></td></tr></table></figure>
-<p>则用 stu1.birthday.year 访问出生的年份。</p>
-<h3 id="4-初始化"><a href="#4-初始化" class="headerlink" title="4. 初始化"></a>4. 初始化</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student stu1, stu2;      //定义结构体变量</span><br><span class="line">strcpy(stu1.name, &quot;Jack&quot;);</span><br><span class="line">stu1.num = 18;</span><br><span class="line">stu1.score = 90.5;</span><br></pre></td></tr></table></figure>
-<p>详细初始化过程查看参考1</p>
-<h3 id="5-结构体数组"><a href="#5-结构体数组" class="headerlink" title="5. 结构体数组"></a>5. 结构体数组</h3><p>结构类型作为一种数据类型，也可以像基本数据类型那样，作为数组的元素的类型。元素属于结构类型的数组成为结构型数组。</p>
-<ul>
-<li>定义</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct 结构名 &#123; </span><br><span class="line">成员列表 </span><br><span class="line">&#125; 数组名[数组长度];</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student&#123;                 //声明结构体 Student</span><br><span class="line">    char name[20];</span><br><span class="line">    int num;</span><br><span class="line">    float score;</span><br><span class="line">&#125;stu[5];                        //定义一个结构结构数组stu，共有5个元素</span><br></pre></td></tr></table></figure>
-<ul>
-<li>初始化</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student stu[2] = &#123;&#123;&quot;Mike&quot;, 27, 91&#125;,&#123;&quot;Tom&quot;, 15, 88.0&#125;&#125;; //定义结构数组的同时进行初始化</span><br><span class="line"></span><br><span class="line">stu[2] = (struct Student)&#123;&quot;Jack&quot;, 12, 85.0&#125;;//先定义后初始化</span><br></pre></td></tr></table></figure>
-<h3 id="6-结构体与指针"><a href="#6-结构体与指针" class="headerlink" title="6. 结构体与指针"></a>6. 结构体与指针</h3><p>当一个指针变量用来指向了一个结构变量，这个指针就成了结构指针变量。<br>结构指针变量中的值是所指向的结构变量的首地址。可以通过指针来访问结构变量。</p>
-<p>1）定义结构指针变量的一般形式：<br>struct 结构名 * 结构指针变量名 </p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct Student *pstu;       //定义了一个指针变量，它只能指向Student结构体类型的结构体变量</span><br></pre></td></tr></table></figure>
-<p>结构指针变量的定义也可以与结构体的定义同时。而且它必须先赋值后使用。<br>数组名表示的是数组的首地址，可以直接赋值给数组指针。但结构变量名只是表示整个结构体变量，不表示结构体变量的首地址，所以不能直接赋值给结构指针变量，而应该使用 &amp; 运算符把结构变量的的地址赋值给结构指针变量。即：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">pstu = stu1;//false</span><br><span class="line">pstu = &amp;stu2; //OK</span><br></pre></td></tr></table></figure>
-<p>注意：结构名、结构变量名、结构体体指针的区别</p>
-<p>2）通过结构指针间接访问成员值</p>
-<p>访问的一般形式：<br>（*结构指针变量）. 成员名 或 结构指针变量 -&gt; 成员名<br>如：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">(*pstu).name</span><br><span class="line">pstu-&gt;name</span><br></pre></td></tr></table></figure>
-<p>注意(pstu)的小括号不能省略，因为成员符“.”优先级为1，取地址符“”优先级为2，去掉括号就相当于*(pstu.name)了。</p>
-<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><ul>
-<li><a href="https://blog.csdn.net/marlene0312/article/details/4746951" target="_blank" rel="noopener">1. C语言中结构体指针的定义和引用</a></li>
-<li><a href="https://blog.csdn.net/yanggangclcsdn/article/details/49718131" target="_blank" rel="noopener">2. C语言中的结构体(struct)</a></li>
-<li><a href="http://c.biancheng.net/cpp/html/100.html" target="_blank" rel="noopener">3. C语言typedef：给类型起一个别名</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/C语言/">C语言</a>
-</div>
-
-
-  <div class="article-tags">
+    <a href="/2018/05/10/property详解/" title="@property详解" itemprop="url">
   
-  <span></span> <a href="/tags/Struct/">Struct</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
+    <h1 itemprop="name">@property详解</h1>
     
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
+     
+           <p itemprop="description" >目录:
+本质
+修饰符
+synthesize, dynamic
+KVO 与 Property
+
+@property 本质：
+概述: @property = ivar + getter + setter@property 其实是属性的声明标识符，提供成员变量的访问方法的声明、控制成员</p>
+        
     
-      <a href="/2018/03/22/ReactiveCocoa-一-基础篇/" title="ReactiveCocoa(一)基础篇" itemprop="url">ReactiveCocoa(一)基础篇</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-03-22T08:27:35.000Z" itemprop="datePublished"> Published 2018-03-22</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h1 id="ReactiveCocoa-一-基础篇"><a href="#ReactiveCocoa-一-基础篇" class="headerlink" title="ReactiveCocoa(一)基础篇"></a>ReactiveCocoa(一)基础篇</h1><h3 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h3><ul>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACSignal.md" target="_blank" rel="noopener">『状态』驱动的世界：ReactiveCocoa</a></li>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACSequence.md" target="_blank" rel="noopener">Pull-Driven 的数据流 RACSequence</a></li>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACSubject.md" target="_blank" rel="noopener">『可变』的热信号 RACSubject</a></li>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACCommand.md" target="_blank" rel="noopener">优雅的 RACCommand</a></li>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACMulticastConnection.md" target="_blank" rel="noopener">用于多播的 RACMulticastConnection</a></li>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACChannel.md" target="_blank" rel="noopener">RAC 中的双向数据绑定 RACChannel</a></li>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACScheduler.md" target="_blank" rel="noopener">理解 RACScheduler 的实现</a></li>
-<li><a href="https://github.com/Draveness/analyze/blob/master/contents/ReactiveObjC/RACDelegateProxy.md" target="_blank" rel="noopener">从代理到 RACSignal</a></li>
-</ul>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
-<li><a href="http://chaoxn.com/2015/11/12/ReactiveCocoa%E4%B8%8EMVVM/" target="_blank" rel="noopener">RAC学习总结(重点看)</a></li>
-<li><a href="http://yulingtianxia.com/blog/2014/07/29/reactivecocoa/" target="_blank" rel="noopener">RAC中常用命令操作</a></li>
-<li><a href="http://cbsfly.github.io/ios/rac2" target="_blank" rel="noopener">信号处理方法归纳</a></li>
-<li><a href="https://draveness.me/raccommand" target="_blank" rel="noopener">RACCommand</a></li>
-<li><a href="https://halfrost.com/reactivecocoa_raccommand/" target="_blank" rel="noopener">RACCommand底层实现分析</a></li>
-<li><a href="https://halfrost.com/tag/reactivecocoa/" target="_blank" rel="noopener">ReactiveCocoa源码解析</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/ReactiveCocoa/">ReactiveCocoa</a>
-</div>
+    <time datetime="2018-05-10T09:35:33.000Z" itemprop="datePublished">2018-05-10</time>
+  </a>
+</section>
 
 
-  <div class="article-tags">
+
+
+
+
   
-  <span></span> <a href="/tags/ReactiveCocoa/">ReactiveCocoa</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2018/05/10/成员变量-实例变量-属性变量/" title="成员变量 实例变量 属性变量" itemprop="url">
+  
+    <h1 itemprop="name">成员变量 实例变量 属性变量</h1>
     
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/02/26/Hexo博客搭建-五-日常维护命令与配置/" title="Hexo博客搭建(五):日常维护命令与配置" itemprop="url">Hexo博客搭建(五):日常维护命令与配置</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-02-26T06:35:44.000Z" itemprop="datePublished"> Published 2018-02-26</time>
-    
-  </p>
-</header>
-    <div class="article-content">
+     
+           <p itemprop="description" >1. 概念与区别：
+成员变量：@interface的{}中包裹的变量
+
+
+@interface xx(){“成员变量”} -&amp;gt; { }包裹的是成员变量—基本数据类型(int/float)+实例变量(NSString)实例变量+基本数据类型变量=成员变量
+
+
+属性变量：声明标</p>
         
-        <h1 id="日常维护与主题配置"><a href="#日常维护与主题配置" class="headerlink" title="日常维护与主题配置"></a>日常维护与主题配置</h1><h2 id="日常维护命令"><a href="#日常维护命令" class="headerlink" title="日常维护命令"></a>日常维护命令</h2><h5 id="1-博客创建，文件提交，部署"><a href="#1-博客创建，文件提交，部署" class="headerlink" title="1. 博客创建，文件提交，部署"></a>1. 博客创建，文件提交，部署</h5><pre><code>hexo new &quot;博客文章题目&quot;    //创建文章
+    
+    <time datetime="2018-05-10T09:30:15.000Z" itemprop="datePublished">2018-05-10</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2018/05/10/synthesize-dynamic详解/" title="@synthesize @dynamic详解" itemprop="url">
+  
+    <h1 itemprop="name">@synthesize @dynamic详解</h1>
+    
+     
+           <p itemprop="description" >@synthesize @dynamic
+OC最初设定@property和@synthesize的作用： 1. @property的作用是定义属性，声明getter,setter方法。(注意：属性不是变量) 2. @synthesize的作用是实现属性的,如getter，sett</p>
+        
+    
+    <time datetime="2018-05-10T09:27:21.000Z" itemprop="datePublished">2018-05-10</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2018/04/23/bridge，-bridge-transfer和-bridge-retained详解/" title="__bridge，__bridge_transfer和__bridge_retained详解" itemprop="url">
+  
+    <h1 itemprop="name">__bridge，__bridge_transfer和__bridge_retained详解</h1>
+    
+     
+           <p itemprop="description" >Objective-C和Core Foundation 对象相互转换的内存管理总结iOS允许Objective-C 和 Core Foundation 对象之间可以轻松的转换，拿 NSString 和 CFStringRef 来说，直接转换毫无压力： [cpp] view pla</p>
+        
+    
+    <time datetime="2018-04-23T09:17:48.000Z" itemprop="datePublished">2018-04-23</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2018/04/04/C-语言中结构体的定义和使用/" title="C 语言中结构体的定义和使用" itemprop="url">
+  
+    <h1 itemprop="name">C 语言中结构体的定义和使用</h1>
+    
+     
+           <p itemprop="description" >1. 声明一般形式
+struct 结构名{ 
+成员列表 
+};struct关键字表示接下来是一个结构
+如：声明一个学生的结构
+struct Student&amp;#123;         //声明结构体    char name[20];      //姓名    int num; </p>
+        
+    
+    <time datetime="2018-04-04T06:19:16.000Z" itemprop="datePublished">2018-04-04</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2018/03/22/ReactiveCocoa-一-基础篇/" title="ReactiveCocoa(一)基础篇" itemprop="url">
+  
+    <h1 itemprop="name">ReactiveCocoa(一)基础篇</h1>
+    
+     
+           <p itemprop="description" >ReactiveCocoa(一)基础篇源码解析
+『状态』驱动的世界：ReactiveCocoa
+Pull-Driven 的数据流 RACSequence
+『可变』的热信号 RACSubject
+优雅的 RACCommand
+用于多播的 RACMulticastConnection</p>
+        
+    
+    <time datetime="2018-03-22T08:27:35.000Z" itemprop="datePublished">2018-03-22</time>
+  </a>
+</section>
+
+
+
+
+
+
+  
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2018/02/26/Hexo博客搭建-五-日常维护命令与配置/" title="Hexo博客搭建(五):日常维护命令与配置" itemprop="url">
+  
+    <h1 itemprop="name">Hexo博客搭建(五):日常维护命令与配置</h1>
+    
+     
+           <p itemprop="description" >日常维护与主题配置日常维护命令1. 博客创建，文件提交，部署hexo new &amp;quot;博客文章题目&amp;quot;    //创建文章
 git add .                 //注意最后的 . ,这个表示当前目录
-git commit -m &quot;.....&quot;    //本地commit
-git push origin hexo       //提交网站相关文件
-git pull origin hexo    //拉取分支
-hexo g -d                 //执行生成网站并部署到GitHub上
-</code></pre><h5 id="2-其他可能用到命令"><a href="#2-其他可能用到命令" class="headerlink" title="2. 其他可能用到命令"></a>2. 其他可能用到命令</h5><pre><code>git branch hexo           //创建hexo分支
-git checkout hexo       //转换到hexo分支
-rm -rf *                   //删除所有文件，隐藏文件不会删除
-git status
-</code></pre><h5 id="3-本地zomfice-github-io文件下执行命令"><a href="#3-本地zomfice-github-io文件下执行命令" class="headerlink" title="3. 本地zomfice.github.io文件下执行命令"></a>3. 本地zomfice.github.io文件下执行命令</h5><pre><code>npm install hexo 
-hexo init 
-npm install 
-npm install hexo-deployer-git   ＃此时当前分支应显示为hexo
-</code></pre><h5 id="4-Tags和分类样式"><a href="#4-Tags和分类样式" class="headerlink" title="4. Tags和分类样式"></a>4. Tags和分类样式</h5><pre><code>---
-title: &apos;Hexo博客搭建 (一):部署到Github&apos;
-date: 2018-02-24 14:39:54
-tags:
-    - Hexo
-categories:
-    - Hexo博客
----
-</code></pre><h5 id="5-站点配置文件与主题配置文件"><a href="#5-站点配置文件与主题配置文件" class="headerlink" title="5. 站点配置文件与主题配置文件"></a>5. 站点配置文件与主题配置文件</h5><p><a href="https://juejin.im/post/5a6ee00ef265da3e4b770ac1" target="_blank" rel="noopener">站点文件与主题配置文件区别</a></p>
-<p><a href="http://theme-next.iissnan.com/getting-started.html" target="_blank" rel="noopener">官方站点文件与主题配置文件</a></p>
-<pre><code>├── _config.yml
-├── package.json
-├── scaffolds
-├── source
-|   ├── _drafts
-|   └── _posts
-└── themes
-
-站点配置文件：_config.yml
-主题配置文件:themes/next/_config.yml
-</code></pre><h5 id="6-语言修改"><a href="#6-语言修改" class="headerlink" title="6.语言修改"></a>6.语言修改</h5><pre><code>站点配置文件下:
-# Site
-title: Zomfice’s blog
-subtitle:
-description: 巧xxxxxxx
-author: Zomfice
-language: zh-Hans
-timezone:
-</code></pre><h5 id="7-代码框序号"><a href="#7-代码框序号" class="headerlink" title="7. 代码框序号"></a>7. 代码框序号</h5><pre><code>站点配置文件
-highlight:
-enable: true
-line_number: false(true-&gt;false)
-auto_detect: false
-tab_replace:
-</code></pre><h5 id="8-仓库配置"><a href="#8-仓库配置" class="headerlink" title="8. 仓库配置"></a>8. 仓库配置</h5><pre><code>站点配置文件
-# Deployment
-## Docs: https://hexo.io/docs/deployment.html
-deploy:
-type: git
-repo: git@github.com:Zomfice/Zomfice.github.io.git
-branch: master
-</code></pre><h5 id="9-Next主题首页文章显示摘要，显示阅读全文"><a href="#9-Next主题首页文章显示摘要，显示阅读全文" class="headerlink" title="9. Next主题首页文章显示摘要，显示阅读全文"></a>9. Next主题首页文章显示摘要，显示阅读全文</h5><p><a href="https://www.jianshu.com/p/393d067dba8d" target="_blank" rel="noopener">Hexo之next主题设置首页不显示全文(只显示预览)</a></p>
-<pre><code>主题配置文件
-# Automatically Excerpt. Not recommand.
-# Please use &lt;!-- more --&gt; in the post to control excerpt accurately.
-auto_excerpt:
-enable: false(false-&gt;true)
-length: 150
-</code></pre><ul>
-<li><a href="https://ohmyarch.github.io/2014/12/24/Hexo%E4%B8%BB%E9%A1%B5%E6%98%BE%E7%A4%BA%E6%91%98%E8%A6%81/" target="_blank" rel="noopener">hexo主页以摘要方式显示</a></li>
-</ul>
-<h5 id="10-怎么让百度和谷歌搜到你的文章呢"><a href="#10-怎么让百度和谷歌搜到你的文章呢" class="headerlink" title="10. 怎么让百度和谷歌搜到你的文章呢"></a>10. 怎么让百度和谷歌搜到你的文章呢</h5><ul>
-<li><a href="http://lijialalala.github.io/2016/04/05/hexoxo-usage/" target="_blank" rel="noopener">怎么让百度和谷歌搜到你的文章呢</a></li>
-<li><a href="http://fionat.github.io/blog/2013/10/23/sitemap/" target="_blank" rel="noopener">｜Hexo优化｜如何向google提交sitemap（详细）</a></li>
-<li><a href="http://selfboot.cn/2014/12/21/add_blog_to_google/" target="_blank" rel="noopener">博客推广——提交搜索引擎</a></li>
-</ul>
-<h5 id="11-搭建遇到的问题"><a href="#11-搭建遇到的问题" class="headerlink" title="11. 搭建遇到的问题"></a>11. 搭建遇到的问题</h5><ul>
-<li><a href="http://lijialalala.github.io/2016/04/05/hexoxo-usage/" target="_blank" rel="noopener">个人搭建HEXO并部署到GitHub的期间遇到的问题</a></li>
-</ul>
-<h5 id="12-分类标签怎么删除"><a href="#12-分类标签怎么删除" class="headerlink" title="12. 分类标签怎么删除"></a>12. 分类标签怎么删除</h5><ul>
-<li><a href="https://segmentfault.com/q/1010000007070284" target="_blank" rel="noopener">hexo 分类 标签怎么删除</a></li>
-</ul>
-<h5 id="13-分类标签无法显示"><a href="#13-分类标签无法显示" class="headerlink" title="13. 分类标签无法显示"></a>13. 分类标签无法显示</h5><p>分类和标签只要的.md文档中按照格式写，就会自动在Tags和categories中显示</p>
-<ul>
-<li><a href="https://www.zhihu.com/question/29017171" target="_blank" rel="noopener">hexo 下的分类和表签无法显示，怎么解决？</a></li>
-</ul>
-<h5 id="14-hexo发布博客"><a href="#14-hexo发布博客" class="headerlink" title="14. hexo发布博客"></a>14. hexo发布博客</h5><pre><code>hexo clean  //每次有大变动，比如更换主题等操作时，可以清理以下之前的缓存；  
-hexo g      //即hexo generate，生成静态文件；
-hexo s      //即hexo server，启动服务器。默认情况下，访问网址为： http://localhost:4000/； 
-hexo d      //即hexo deploy，部署网站到Github。
-</code></pre><p>hexo常用命令</p>
-<pre><code>hexo n &quot;我的博客&quot; == hexo new &quot;我的博客&quot; #新建文章
-hexo p == hexo publish                   #发布草稿
-hexo g == hexo generate               #生成静态网页
-hexo s == hexo server                   #启动服务预览
-hexo d == hexo deploy                 #部署
-</code></pre><h5 id="15-主题优化"><a href="#15-主题优化" class="headerlink" title="15. 主题优化"></a>15. 主题优化</h5><ul>
-<li><a href="https://www.jianshu.com/p/efbeddc5eb19" target="_blank" rel="noopener">HEXO +下一步个人博客主题优化</a></li>
-</ul>
-<h5 id="16-购买域名"><a href="#16-购买域名" class="headerlink" title="16. 购买域名"></a>16. 购买域名</h5><ul>
-<li><a href="https://www.jianshu.com/p/05289a4bc8b2" target="_blank" rel="noopener">购买域名</a></li>
-</ul>
-<h5 id="17-统计、分享、RSS、更新、域名"><a href="#17-统计、分享、RSS、更新、域名" class="headerlink" title="17. 统计、分享、RSS、更新、域名"></a>17. 统计、分享、RSS、更新、域名</h5><ul>
-<li><a href="http://ibruce.info/2013/11/22/hexo-your-blog/" target="_blank" rel="noopener">hexo你的博客</a></li>
-</ul>
-<h5 id="18-主题配置与更换"><a href="#18-主题配置与更换" class="headerlink" title="18. 主题配置与更换"></a>18. 主题配置与更换</h5><ul>
-<li><a href="http://theme-next.iissnan.com/theme-settings.html" target="_blank" rel="noopener">hexo主题配置</a></li>
-<li><a href="http://oakland.github.io/2016/04/30/hexo-%E5%A6%82%E4%BD%95%E6%9B%B4%E6%8D%A2%E4%B8%BB%E9%A2%98%E3%80%81%E5%88%A0%E9%99%A4%E6%96%87%E7%AB%A0/" target="_blank" rel="noopener">hexo更换主题、删除文章</a></li>
-</ul>
-<h2 id="主要参考文档"><a href="#主要参考文档" class="headerlink" title="主要参考文档"></a>主要参考文档</h2><ul>
-<li><a href="https://www.jianshu.com/p/dd9244bbc550" target="_blank" rel="noopener">创建</a></li>
-<li><a href="https://www.jianshu.com/p/6fb0b287f950" target="_blank" rel="noopener">多设备同步</a></li>
-<li><a href="https://www.cnblogs.com/ayseeing/p/3572582.html" target="_blank" rel="noopener">SHH key</a></li>
-<li><a href="https://www.jianshu.com/p/1e402922ee32" target="_blank" rel="noopener">Markdown</a></li>
-<li><a href="http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/" target="_blank" rel="noopener">使用</a></li>
-<li><a href="https://hexo.io/docs/" target="_blank" rel="noopener">Hexo官方</a></li>
-<li><a href="https://hexo.io/zh-cn/docs/themes.html" target="_blank" rel="noopener">Hexo-Next主题</a></li>
-</ul>
-
+git commit -m &amp;quot;.....&amp;</p>
         
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/Hexo博客/">Hexo博客</a>
-</div>
+    
+    <time datetime="2018-02-26T06:35:44.000Z" itemprop="datePublished">2018-02-26</time>
+  </a>
+</section>
 
 
-  <div class="article-tags">
+
+
+
+
   
-  <span></span> <a href="/tags/Hexo/">Hexo</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
+<section class="post" itemscope itemprop="blogitem">
+  
+    <a href="/2018/02/26/Hexo博客搭建-四-Markdown使用/" title="Hexo博客搭建(四):Markdown使用" itemprop="url">
+  
+    <h1 itemprop="name">Hexo博客搭建(四):Markdown使用</h1>
     
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/02/26/Hexo博客搭建-四-Markdown使用/" title="Hexo博客搭建(四):Markdown使用" itemprop="url">Hexo博客搭建(四):Markdown使用</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-02-26T05:49:11.000Z" itemprop="datePublished"> Published 2018-02-26</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h1 id="Hexo博客编写使用Markdown"><a href="#Hexo博客编写使用Markdown" class="headerlink" title="Hexo博客编写使用Markdown"></a>Hexo博客编写使用Markdown</h1><p><img src="http://ww1.sinaimg.cn/large/6aee7dbbgw1effcq2gx92j210j0ustj7.jpg" alt="markdownImage"></p>
-<h2 id="编辑工具MacDown"><a href="#编辑工具MacDown" class="headerlink" title="编辑工具MacDown"></a>编辑工具MacDown</h2><p><a href="https://macdown.uranusjr.com/" target="_blank" rel="noopener">MacDown</a></p>
-<h2 id="Markdown语法"><a href="#Markdown语法" class="headerlink" title="Markdown语法"></a>Markdown语法</h2><h3 id="1-标题"><a href="#1-标题" class="headerlink" title="1. 标题"></a>1. 标题</h3><pre><code># 一级标题
+     
+           <p itemprop="description" >Hexo博客编写使用Markdown
+编辑工具MacDownMacDown
+Markdown语法1. 标题# 一级标题
 ## 二级标题
 ### 三级标题
-</code></pre><p>以此类推，总共六级标题，建议在井号后加一个空格，这是最标准的 Markdown 语法。</p>
-<h3 id="2-列表"><a href="#2-列表" class="headerlink" title="2. 列表"></a>2. 列表</h3><pre><code>- 或 * 变为无序列表 
-
-文字前加1. 2. 3. 符号要和文字之间加上一个字符的空格变为有序列表
-</code></pre><p><img src="http://ww4.sinaimg.cn/large/6aee7dbbgw1effew5aftij20d80bz3yw.jpg" alt="icon3"></p>
-<h2 id="3-引用"><a href="#3-引用" class="headerlink" title="3. 引用"></a>3. 引用</h2><p>只需要在文本前加入 &gt; 这种尖括号（大于号）即可</p>
-<blockquote>
-<p>列如</p>
-</blockquote>
-<p><img src="http://ww3.sinaimg.cn/large/6aee7dbbgw1effezhonxlj20e009c3yu.jpg" alt="icon4"></p>
-<h2 id="4-图片与链接"><a href="#4-图片与链接" class="headerlink" title="4. 图片与链接"></a>4. 图片与链接</h2><pre><code>图片为：![]()
-链接为：[]()
-</code></pre><h2 id="5-粗体与斜体"><a href="#5-粗体与斜体" class="headerlink" title="5. 粗体与斜体"></a>5. 粗体与斜体</h2><pre><code>** 粗体 **
-* 斜体 *
-</code></pre><h2 id="6-表格"><a href="#6-表格" class="headerlink" title="6. 表格"></a>6. 表格</h2><pre><code>| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
-</code></pre><table>
-<thead>
-<tr>
-<th>Tables</th>
-<th style="text-align:center">Are</th>
-<th style="text-align:right">Cool</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>col 3 is</td>
-<td style="text-align:center">right-aligned</td>
-<td style="text-align:right">$1600</td>
-</tr>
-<tr>
-<td>col 2 is</td>
-<td style="text-align:center">centered</td>
-<td style="text-align:right">$12</td>
-</tr>
-<tr>
-<td>zebra stripes</td>
-<td style="text-align:center">are neat</td>
-<td style="text-align:right">$1</td>
-</tr>
-</tbody>
-</table>
-<h2 id="7-代码框"><a href="#7-代码框" class="headerlink" title="7.代码框"></a>7.代码框</h2><pre><code><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">代码 (多加`为了显示效果)</span><br></pre></td></tr></table></figure>
-
-``高亮`
-</code></pre><p><a href="http://www.meeko.tech/article/10" target="_blank" rel="noopener">MarkDown语法中代码怎么换行？</a></p>
-<p><a href="https://github.com/iissnan/hexo-theme-next/issues/211" target="_blank" rel="noopener">代码不让它显示行数序号数字</a></p>
-<h2 id="8-修改图片布局"><a href="#8-修改图片布局" class="headerlink" title="8.修改图片布局"></a>8.修改图片布局</h2><pre><code>&lt;div align=center&gt;&lt;img src=&quot;http://img02.tooopen.com/images/20160509/tooopen_sy_161967094653.jpg&quot; width=&quot;100&quot; height=&quot;80&quot; &gt;&lt;/div&gt;
-</code></pre><p><a href="https://www.jianshu.com/p/9d94660a96f1" target="_blank" rel="noopener">hexo插入图片调整大小位置</a></p>
-<h2 id="9-修改字体颜色"><a href="#9-修改字体颜色" class="headerlink" title="9.修改字体颜色"></a>9.修改字体颜色</h2><pre><code>&lt;font color=red&gt;参考:&lt;/font&gt;        
-</code></pre><h2 id="10-图床工具"><a href="#10-图床工具" class="headerlink" title="10.图床工具"></a>10.图床工具</h2><ul>
-<li><p><a href="https://jiantuku.com/#/" target="_blank" rel="noopener">极简图床</a></p>
-<p>  在chrome安装极简图床插件，注册，登录微博账号，讲图片保存在微博相册，返回图片链接</p>
-</li>
-<li><p><a href="https://www.jianshu.com/p/6dce6094bf61" target="_blank" rel="noopener">七牛云做图床工具1</a></p>
-</li>
-<li><a href="https://www.jianshu.com/p/44d818f781a7" target="_blank" rel="noopener">七牛云做图床工具2</a></li>
-</ul>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="https://www.jianshu.com/p/1e402922ee32" target="_blank" rel="noopener">Markdown——入门指南</a></li>
-<li><a href="http://www.markdown.cn/#overview" target="_blank" rel="noopener">Markdown官方</a></li>
-<li><a href="https://www.gitbook.com/book/vincent4j/markdowncn/details" target="_blank" rel="noopener">Markdown 语法</a></li>
-<li><a href="https://www.jianshu.com/p/9d94660a96f1" target="_blank" rel="noopener">MarkDown使用小技巧</a></li>
-<li><a href="http://blog.csdn.net/u010177286/article/details/50358720" target="_blank" rel="noopener">Markdown 常用技巧</a></li>
-<li><a href="https://wizardforcel.gitbooks.io/markdown-simple-world/1.html" target="_blank" rel="noopener">Markdown编辑器推荐</a></li>
-</ul>
-<h5 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h5><ul>
-<li><a href="http://www.meeko.tech/article/10" target="_blank" rel="noopener">[行近MarkDown]MarkDown语法中代码怎么换行？</a></li>
-<li><a href="https://github.com/iissnan/hexo-theme-next/issues/211" target="_blank" rel="noopener">代码不让它显示行数序号数字</a></li>
-<li><a href="https://www.jianshu.com/p/9d94660a96f1" target="_blank" rel="noopener">hexo插入图片调整大小位置</a></li>
-<li><a href="https://macdown.uranusjr.com/" target="_blank" rel="noopener">MacDown</a></li>
-</ul>
-
+以此类推，总共六级标题，建议在井号后加一个空格，这是最标准的 Markdown 语法。
+2. 列表- 或 * 变为无序列表 
+</p>
         
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/Hexo博客/">Hexo博客</a>
-</div>
+    
+    <time datetime="2018-02-26T05:49:11.000Z" itemprop="datePublished">2018-02-26</time>
+  </a>
+</section>
 
 
-  <div class="article-tags">
+
+
+
+
   
-  <span></span> <a href="/tags/Hexo/">Hexo</a><a href="/tags/Markdown/">Markdown</a>
-  </div>
-
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
-
-
-
-
-
-   
-    
-    <article class="post-expand post" itemprop="articleBody"> 
-        <header class="article-info clearfix">
-  <h1 itemprop="name">
-    
-      <a href="/2018/02/25/Hexo博客搭建-三-多设备同步/" title="Hexo博客搭建(三):多设备同步" itemprop="url">Hexo博客搭建(三):多设备同步</a>
-  </h1>
-  <p class="article-author">By
-       
-		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
-		
-  <p class="article-time">
-    <time datetime="2018-02-25T15:31:06.000Z" itemprop="datePublished"> Published 2018-02-25</time>
-    
-  </p>
-</header>
-    <div class="article-content">
-        
-        <h1 id="Hexo搭建通过GitHub版本控制思想多端同步"><a href="#Hexo搭建通过GitHub版本控制思想多端同步" class="headerlink" title="Hexo搭建通过GitHub版本控制思想多端同步"></a>Hexo搭建通过GitHub版本控制思想多端同步</h1><h4 id="导语"><a href="#导语" class="headerlink" title="导语"></a>导语</h4><blockquote>
-<p>hexo 是一个静态博客工具，唯一的不足就是源文件无法同步,几乎只能在一台电脑上写博客。而解决方法之一是使用Github 来管理我们的 hexo 源文件。</p>
-</blockquote>
-<h4 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h4><blockquote>
-<p>在博客的远程仓库即GitHub的博客youraccount.github.io仓库新建一个分支，用这个分支来存储博客的源文件。Master是hexo deploy的自动生成和管理、hexo分支存储博客的源文件。一个负责管理hexo发布的自动管理，一个用于存储本地的博客源文件，用于实现多端源文件相同。</p>
-</blockquote>
-<h2 id="一：在搭建博客开始就将多端同步同时建立"><a href="#一：在搭建博客开始就将多端同步同时建立" class="headerlink" title="一：在搭建博客开始就将多端同步同时建立"></a>一：在搭建博客开始就将多端同步同时建立</h2><h3 id="博客搭建：一详情参考"><a href="#博客搭建：一详情参考" class="headerlink" title="博客搭建：一详情参考"></a>博客搭建：一<a href="https://www.jianshu.com/p/6fb0b287f950" target="_blank" rel="noopener">详情参考</a></h3><p>同步思路与Github推拉源码思路相同，使用git指令，保持本地的博客文件与Github上的博客文件相同即可，其步骤如下：</p>
-<h5 id="1-使用hexo搭建部署Github博客"><a href="#1-使用hexo搭建部署Github博客" class="headerlink" title="1. 使用hexo搭建部署Github博客"></a>1. 使用hexo搭建部署Github博客</h5><pre><code>// 在本地博客根目录下安装hexo
-npm install hexo
-// 初始化hexo
-npm init
-// 安装依赖
-npm install
-// 安装部署相关的配置
-npm install hexo-deployer-git
-</code></pre><h5 id="2-上传博客工程"><a href="#2-上传博客工程" class="headerlink" title="2. 上传博客工程"></a>2. 上传博客工程</h5><p>上一步部署博客到Github以后，我们可以在Github仓库的master分支上看到我们上传的博客文件。</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/291600-9c5faf3a622cf574.png" alt="icon"></p>
-<p>但是这个博客文件是不包含hexo配置的，所以我们需要新建分支，使用git指令将带hexo配置的Github工程文件上传到新建的分支上。</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/291600-fd8d2be4578c9aa4.png" alt="icon2"></p>
-<p>在本地博客根目录下使用git指令上传项目到Github:</p>
-<pre><code>// git初始化
-git init
-// 添加仓库地址
-git remote add origin https://github.com/用户名/仓库名.git
-// 新建分支并切换到新建的分支
-git checkout -b 分支名
-// 添加所有本地文件到git
-git add .
-// git提交
-git commit -m &quot;&quot;
-// 文件推送到hexo分支
-git push origin hexo
-</code></pre><p>其他设备上clone下Github上新建的分支的文件到本地<br>在另一台设备上使用git指令下载Github新建分支上的文件:</p>
-<pre><code>// 克隆文件到本地
-git clone -b 分支名 https://github.com/用户名/仓库名.git
-</code></pre><h5 id="3-部署到Github"><a href="#3-部署到Github" class="headerlink" title="3. 部署到Github"></a>3. 部署到Github</h5><pre><code>// 安装hexo
-npm install hexo
-// 注意这里不需要hexo初始化：hexo init；否则之前的hexo配置参数会重置
-// 安装依赖库
-npm install
-// 安装部署相关配置
-npm install hexo-deployer-git
-</code></pre><h5 id="4-同步项目源文件到Github"><a href="#4-同步项目源文件到Github" class="headerlink" title="4. 同步项目源文件到Github"></a>4. 同步项目源文件到Github</h5><pre><code>// 添加源文件
-git add .
-// git提交
-git commit -m &quot;&quot;
-// 先拉原来Github分支上的源文件到本地，进行合并
-// 分支名后面的“--allow-unrelated-histories”是为了弹出“fatal: refusing to merge unrelated histories.”的错误
-git pull origin 分支名 --allow-unrelated-histories
-// 比较解决前后版本冲突后，push源文件到Github的分支
-git push origin 分支名
-</code></pre><p>至此多设备同步到此为止</p>
-<h5 id="5-问题"><a href="#5-问题" class="headerlink" title="5. 问题"></a>5. 问题</h5><ul>
-<li><p>Deployer not found: git<br>  在终端执行命令：</p>
-  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
-<p>  然后继续执行hexo deploye指令进行部署。</p>
-</li>
-<li>fatal: could not read Username for ‘ <a href="https://github.com" target="_blank" rel="noopener">https://github.com</a> ‘: Invalid argument<br>  由于使用的是https协议，安全性较高，所以系统终端不允许部署，所以我们该用 ssh，修改本地博客hexo配置文件_config.yml，将repository参数修改如下：<br>  <img src="https://upload-images.jianshu.io/upload_images/291600-d237476f9941b30c.png" alt="icon3"><br>  继续执行hexo deploye指令进行部署。</li>
-<li><p>Could not read from remote repository<br>  这是因为系统没有添加github的ssh信任到本机，所以我们要在命令行执行：</p>
-  <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ssh -T git@github.com</span><br><span class="line">yes</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p><a href="https://www.jianshu.com/p/6fb0b287f950" target="_blank" rel="noopener">文章详情参考</a></p>
-<h3 id="博客搭建：二详情参考"><a href="#博客搭建：二详情参考" class="headerlink" title="博客搭建：二详情参考"></a>博客搭建：二<a href="http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more" target="_blank" rel="noopener">详情参考</a></h3><pre><code>1. 创建仓库，youraccount.github.io
-2. 创建两个分支：master 与 hexo
-3. 设置hexo为默认分支（因为我们只需要手动管理这个分支上的Hexo网站文件，master分支为hexo deploy自动生成和管理）
-4. 使用git clone git@github.com:youraccount/youraccount.github.io.git拷贝仓库
-5. 在本地youraccount.github.io文件夹下通过Git bash依次执行npm install hexo、hexo init、npm install 和 npm install hexo-deployer-git（此时当前分支应显示为hexo）
-6. 修改_config.yml中的deploy参数，分支应为master
-7. 依次执行git add .、git commit -m “…”、git push origin hexo提交网站相关的文件
-8. 执行hexo generate -d生成网站并部署到GitHub上
-</code></pre><p>这样一来，在GitHub上的youraccount.github.io仓库就有两个分支，一个hexo分支用来存放网站的原始文件，一个master分支用来存放生成的静态网页</p>
-<font color="red">注意：</font>
-
-<ul>
-<li>分支的创建一定要在Git Bash(博客目录下)。    切不可在GitHub仓库直接点击生成新的分支，我在仓库直接生成分支，导致一直上传失败，然后需要先pull仓库文件，导致本地出现源文件和自动生成管理文件混合 </li>
-<li><p>当不知道当前分支的时候查看当前分支 git branch -v</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MacBook-Pro:Zomfice.github.io WZY$ git branch -v </span><br><span class="line">* hexo   2d90e51 修改</span><br><span class="line">  master 7b6392f [ahead 1, behind 14] 提交分支hexo</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<font color="red">补充(遇到的问题)：</font>
-
-<h5 id="问题1：由于我是先配置好博客，才处理多端同步问题，然后直接在GitHub新建hexo分支，然后对本地文件夹和仓库关联，然后执行push-发现无法提交，查看GitHub仓库自动生成管理文件存在，然后拉取分支，本地文件和自动生成管理文件混合。"><a href="#问题1：由于我是先配置好博客，才处理多端同步问题，然后直接在GitHub新建hexo分支，然后对本地文件夹和仓库关联，然后执行push-发现无法提交，查看GitHub仓库自动生成管理文件存在，然后拉取分支，本地文件和自动生成管理文件混合。" class="headerlink" title="问题1：由于我是先配置好博客，才处理多端同步问题，然后直接在GitHub新建hexo分支，然后对本地文件夹和仓库关联，然后执行push,发现无法提交，查看GitHub仓库自动生成管理文件存在，然后拉取分支，本地文件和自动生成管理文件混合。"></a>问题1：由于我是先配置好博客，才处理多端同步问题，然后直接在GitHub新建hexo分支，然后对本地文件夹和仓库关联，然后执行push,发现无法提交，查看GitHub仓库自动生成管理文件存在，然后拉取分支，本地文件和自动生成管理文件混合。</h5><p>解决：</p>
-<ol>
-<li><p>首先进行版本回滚，回滚到<a href="https://ws1.sinaimg.cn/large/ad3a9ce5ly1fot5w7h6eij210q0b0n0t.jpg" target="_blank" rel="noopener">之前版本</a></p>
-</li>
-<li><p>远程分支存在需要删除,<a href="https://segmentfault.com/q/1010000008841093" target="_blank" rel="noopener">git怎么删除远程分支</a></p>
-</li>
-<li><p>本地也初始化了一个分支(注:  git checkout -b 分支名 新建分支并切换到新建的分支),删除本地分支</p>
-</li>
-<li><p><a href="https://segmentfault.com/q/1010000008841093" target="_blank" rel="noopener">删除掉没有与远程分支对应的本地分支</a></p>
-<p> 查看远程分支</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git remote -v</span><br></pre></td></tr></table></figure>
-<p> 查看本地分支</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git branch  -v</span><br></pre></td></tr></table></figure>
-<p> 新建并切换到新的分支</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git checkout -b 分支名</span><br></pre></td></tr></table></figure>
-<p> 删除远程分支</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git branch -r -d origin/branch-name</span><br></pre></td></tr></table></figure>
-<p> 删除本地分支</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git branch -d xxxxx</span><br></pre></td></tr></table></figure>
-<p> 删除掉没有与远程分支对应的本地分支</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git fetch -p</span><br></pre></td></tr></table></figure>
-<p> 切换分支</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git checkout -b hexo</span><br></pre></td></tr></table></figure>
-<p> <a href="https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013744142037508cf42e51debf49668810645e02887691000" target="_blank" rel="noopener">git 记录你的每一个命令</a></p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git reflog</span><br></pre></td></tr></table></figure>
-<p> git 状态</p>
- <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<h5 id="问题2：-modified-themes-next-modified-content"><a href="#问题2：-modified-themes-next-modified-content" class="headerlink" title="问题2： modified:   ../themes/next (modified content)"></a>问题2： modified:   ../themes/next (modified content)</h5><p><a href="https://segmentfault.com/q/1010000010287878" target="_blank" rel="noopener">解决</a>：hexo g 生成静态页面<br>hexo d 部署hexo之后提交代码</p>
-<h5 id="问题3：Hexo-deploy-发布不成功"><a href="#问题3：Hexo-deploy-发布不成功" class="headerlink" title="问题3：Hexo deploy 发布不成功"></a>问题3：<a href="https://github.com/hexojs/hexo/issues/67" target="_blank" rel="noopener">Hexo deploy 发布不成功</a></h5><h5 id="问题4：npm-WARN-enoent-ENOENT-no-such-file-or-directory-open-‘-node-modules-supertest-package-json’本地文件package丢失"><a href="#问题4：npm-WARN-enoent-ENOENT-no-such-file-or-directory-open-‘-node-modules-supertest-package-json’本地文件package丢失" class="headerlink" title="问题4：npm WARN enoent ENOENT: no such file or directory, open ‘/node_modules/supertest/package.json’本地文件package丢失"></a>问题4：<a href="https://github.com/visionmedia/debug/issues/261" target="_blank" rel="noopener">npm WARN enoent ENOENT: no such file or directory, open ‘<root>/node_modules/supertest/package.json’</root></a>本地文件package丢失</h5><p>解决：重新对npm配置，但是不要hexo init，重新对npm和hexo建立依赖,如果不行，执行npm cache clean之后再执行</p>
-<h2 id="二：-推荐-在搭建完成博客之后将多端同步加入"><a href="#二：-推荐-在搭建完成博客之后将多端同步加入" class="headerlink" title="二：(推荐)在搭建完成博客之后将多端同步加入"></a>二：(推荐)在搭建完成博客之后将多端同步加入</h2><p>通过教程一搭建完成博客，然后通过加入多端同步，只需对前文 博客一步骤进行精简就好.将本地仓库与远程仓库建立连接，创建远程分支，并切换到新建分支。</p>
-<pre><code>// git初始化
-git init
-// 添加仓库地址
-git remote add origin https://github.com/用户名/仓库名.git
-// 新建分支并切换到新建的分支
-git checkout -b 分支名
-// 添加所有本地文件到git
-git add .
-// git提交
-git commit -m &quot;&quot;
-// 文件推送到hexo分支
-git push origin hexo
-//执行生成网站并部署到GitHub上
-hexo g -d  
-</code></pre><font color="red">参考：</font>
-
-<ul>
-<li><p><a href="https://www.jianshu.com/p/6fb0b287f950" target="_blank" rel="noopener">多设备同步hexo搭建的Github博客</a></p>
-</li>
-<li><p><a href="http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/" target="_blank" rel="noopener">HEXO换电脑麻烦解决</a></p>
-<h2 id="三：配置完成多端同步，新设备如何配置使用"><a href="#三：配置完成多端同步，新设备如何配置使用" class="headerlink" title="三：配置完成多端同步，新设备如何配置使用"></a>三：配置完成多端同步，新设备如何配置使用</h2></li>
-</ul>
-<h5 id="1-在新设备中安装node-js和Git"><a href="#1-在新设备中安装node-js和Git" class="headerlink" title="1. 在新设备中安装node.js和Git"></a>1. 在新设备中安装node.js和Git</h5><p>无需多说，直接点击链接安装：<a href="https://nodejs.org/en/" target="_blank" rel="noopener">node.js</a>，<a href="https://gitforwindows.org/" target="_blank" rel="noopener">Git</a>。</p>
-<h5 id="2-给新设备添加SSH-KEYS"><a href="#2-给新设备添加SSH-KEYS" class="headerlink" title="2. 给新设备添加SSH KEYS"></a>2. 给新设备添加SSH KEYS</h5><p>在Git Bash中输入：</p>
-<blockquote>
-<p>ssh-keygen -t rsa -C “你的邮箱地址”</p>
-</blockquote>
-<p>按三次回车（密码为空），生成密匙。</p>
-<p>在C:\Users\Administrator.ssh中（Administrator为自己对应的管理员账号），得到两个文件，分别为id_rsa和id_rsa.pub。</p>
-<p>打开id_rsa.pub，复制全文。进入GitHub中的<a href="https://github.com/settings/keys" target="_blank" rel="noopener">SSH设置</a> ，Add SSH key，粘贴进去。</p>
-<h5 id="3-新设备同步"><a href="#3-新设备同步" class="headerlink" title="3. 新设备同步"></a>3. 新设备同步</h5><p>使用git clone <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:youraccount/youraccount.github.io.git拷贝仓库（默认分支为hexo）</p>
-<p>在本地得到的youraccount.github.io文件夹下通过Git bash依次执行下列指令：<br>npm install -g hexo、npm install、npm install hexo-deployer-git即可将最新的博客文件全部同步。</p>
-<font color="red">参考:</font>
-
-<ul>
-<li><a href="http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more" target="_blank" rel="noopener">hexo多设备同步与版本控制实现</a></li>
-</ul>
-<h2 id="四：日常维护使用"><a href="#四：日常维护使用" class="headerlink" title="四：日常维护使用"></a>四：日常维护使用</h2><p>在本地对博客进行修改（添加新博文、修改样式等等）后，通过下面的流程进行管理：</p>
-<pre><code>1. hexo new &quot;文章名&quot;
-2. git add .
-3. git commit -m “…”
-4. git push origin hexo
-5. hexo g -d
-</code></pre><font color="red">参考:</font>
-
-<ul>
-<li><p><a href="http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/" target="_blank" rel="noopener">HEXO换电脑麻烦解决</a></p>
-</li>
-<li><p><a href="http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more" target="_blank" rel="noopener">hexo多设备同步与版本控制实现</a></p>
-</li>
-</ul>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><h5 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h5><ul>
-<li><a href="http://www.ruanyifeng.com/blog/2014/06/git_remote.html" target="_blank" rel="noopener">Git命令</a></li>
-<li><a href="https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000" target="_blank" rel="noopener">Git教程</a></li>
-<li><a href="https://www.jianshu.com/p/f7451177476a" target="_blank" rel="noopener">Git代码回退</a></li>
-<li><a href="http://blog.csdn.net/arkblue/article/details/9568249" target="_blank" rel="noopener">git 查看远程分支、本地分支、创建分支、把分支推到远程repository、删除本地分支</a></li>
-<li><a href="https://segmentfault.com/q/1010000008841093" target="_blank" rel="noopener">删除掉没有与远程分支对应的本地分支</a></li>
-<li><a href="https://www.git-tower.com/learn/git/ebook/cn/command-line/advanced-topics/merge-conflicts" target="_blank" rel="noopener">处理合并冲突</a></li>
-</ul>
-<h5 id="多设备"><a href="#多设备" class="headerlink" title="多设备"></a>多设备</h5><ul>
-<li><a href="https://www.jianshu.com/p/6fb0b287f950" target="_blank" rel="noopener">多设备同步hexo搭建的Github博客</a></li>
-<li><a href="http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more" target="_blank" rel="noopener">hexo多设备同步与版本控制实现</a></li>
-<li><a href="http://imweb.io/topic/5848d4259be501ba17b10a9a" target="_blank" rel="noopener">hexo 博客利用 github 分支同步源文件</a></li>
-<li><a href="http://mungo.space/2015/10/14/create-hexo-on-github-4/" target="_blank" rel="noopener">在Github上面搭建Hexo博客（四）:使用不同电脑维护</a></li>
-<li><a href="http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/" target="_blank" rel="noopener">HEXO换电脑麻烦解决</a></li>
-<li><a href="https://www.zhihu.com/question/21193762" target="_blank" rel="noopener">使用hexo，如果换了电脑怎么更新博客？</a></li>
-</ul>
-<h5 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h5><ul>
-<li><a href="https://www.jianshu.com/p/6fb0b287f950" target="_blank" rel="noopener">多设备同步hexo搭建的Github博客</a></li>
-<li><a href="http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/" target="_blank" rel="noopener">HEXO换电脑麻烦解决</a></li>
-<li><a href="http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more" target="_blank" rel="noopener">hexo多设备同步与版本控制实现</a></li>
-<li><a href="http://mungo.space/2015/10/14/create-hexo-on-github-4/" target="_blank" rel="noopener">在Github上面搭建Hexo博客（四）:使用不同电脑维护</a></li>
-</ul>
-<h5 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h5><ul>
-<li><a href="http://dontcry2013.github.io/2016/03/02/hexo-change-workstation/" target="_blank" rel="noopener">HEXO换电脑麻烦解决</a></li>
-<li><a href="http://zealscott.com/2018/02/21/hexo%E5%A4%9A%E8%AE%BE%E5%A4%87%E5%90%8C%E6%AD%A5%E4%B8%8E%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E5%AE%9E%E7%8E%B0/#more" target="_blank" rel="noopener">hexo多设备同步与版本控制实现</a></li>
-</ul>
-
-        
-        
-        <p class="article-more-link">
-          
-       </p>
-    </div>
-    <footer class="article-footer clearfix">
-<div class="article-catetags">
-
-<div class="article-categories">
-  <span></span>
-  <a class="article-category-link" href="/categories/Hexo博客/">Hexo博客</a>
-</div>
-
-
-  <div class="article-tags">
+<section class="post" itemscope itemprop="blogitem">
   
-  <span></span> <a href="/tags/Hexo/">Hexo</a>
-  </div>
+    <a href="/2018/02/25/Hexo博客搭建-三-多设备同步/" title="Hexo博客搭建(三):多设备同步" itemprop="url">
+  
+    <h1 itemprop="name">Hexo博客搭建(三):多设备同步</h1>
+    
+     
+           <p itemprop="description" >Hexo搭建通过GitHub版本控制思想多端同步导语
+hexo 是一个静态博客工具，唯一的不足就是源文件无法同步,几乎只能在一台电脑上写博客。而解决方法之一是使用Github 来管理我们的 hexo 源文件。
 
-</div>
-
-
-
-
-<div class="comments-count">
-	
-</div>
-
-</footer>
-
-
-    </article>
-
+思路
+在博客的远程仓库即GitHub的博客youraccount.g</p>
+        
+    
+    <time datetime="2018-02-25T15:31:06.000Z" itemprop="datePublished">2018-02-25</time>
+  </a>
+</section>
 
 
 
 
 
 
-  <nav id="page-nav" class="clearfix">
+
+  <nav id="page-nav" class="clearfix unexpand">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
   </nav>
 
@@ -1649,13 +428,13 @@ hexo g -d
         
           <li>
             
-            	<a href="https://coderq.com" target="_blank" title="一个面向程序员交流分享的新一代社区">码农圈</a>
+            	<a href="https://github.com/Zomfice" target="_blank" title="GitHub">GitHub</a>
             
           </li>
         
           <li>
             
-            	<a href="http://wuchong.me" target="_blank" title="Jark&#39;s Blog">Jark&#39;s Blog</a>
+            	<a href="https://zomfice.github.io/" target="_blank" title="Zomfice&#39;s Blog">Zomfice&#39;s Blog</a>
             
           </li>
         
