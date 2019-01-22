@@ -1,0 +1,571 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Protocol默认实现 | Zomfice’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="Zomfice">
+    
+
+    
+    <meta name="description" content="Protocol默认实现需求： Protocol作为方法声明必须实现后才能才能进行操作处理，有没有办法可以实现协议不用实现就可以有默认值？ libextobjc 是一个提供语言级别的各种小功能的库。 用法MyProtocol.h@protocol MyProtocol &amp;lt;NSObject&amp;gt;@concrete- (void)testProtocol;@endMyProtocol.m@co">
+<meta name="keywords" content="Protocol">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Protocol默认实现">
+<meta property="og:url" content="http://yoursite.com/2019/01/22/Protocol默认实现/index.html">
+<meta property="og:site_name" content="Zomfice’s blog">
+<meta property="og:description" content="Protocol默认实现需求： Protocol作为方法声明必须实现后才能才能进行操作处理，有没有办法可以实现协议不用实现就可以有默认值？ libextobjc 是一个提供语言级别的各种小功能的库。 用法MyProtocol.h@protocol MyProtocol &amp;lt;NSObject&amp;gt;@concrete- (void)testProtocol;@endMyProtocol.m@co">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-01-22T09:13:09.542Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Protocol默认实现">
+<meta name="twitter:description" content="Protocol默认实现需求： Protocol作为方法声明必须实现后才能才能进行操作处理，有没有办法可以实现协议不用实现就可以有默认值？ libextobjc 是一个提供语言级别的各种小功能的库。 用法MyProtocol.h@protocol MyProtocol &amp;lt;NSObject&amp;gt;@concrete- (void)testProtocol;@endMyProtocol.m@co">
+
+    
+    <link rel="alternative" href="/atom.xml  https://zomfice.github.io/" title="Zomfice’s blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.png" alt="Zomfice’s blog" title="Zomfice’s blog"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="Zomfice’s blog">Zomfice’s blog</a></h1>
+				<h2 class="blog-motto">Zomfice的博客</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="/search/index.html" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" autocomplete="off" name="q" maxlength="20" placeholder="搜索" />
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2019/01/22/Protocol默认实现/" title="Protocol默认实现" itemprop="url">Protocol默认实现</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="Zomfice" target="_blank" itemprop="author">Zomfice</a>
+		
+  <p class="article-time">
+    <time datetime="2019-01-22T09:11:40.000Z" itemprop="datePublished"> 发表于 2019-01-22</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Protocol默认实现"><span class="toc-number">1.</span> <span class="toc-text">Protocol默认实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#用法"><span class="toc-number">1.0.1.</span> <span class="toc-text">用法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#concrete"><span class="toc-number">1.0.1.0.1.</span> <span class="toc-text">concrete</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#concreteprotocol"><span class="toc-number">1.0.1.0.2.</span> <span class="toc-text">concreteprotocol</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分析"><span class="toc-number">1.0.2.</span> <span class="toc-text">分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#attribute-constructor"><span class="toc-number">1.0.2.1.</span> <span class="toc-text">attribute((constructor))</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#constructor-destructor"><span class="toc-number">1.0.2.2.</span> <span class="toc-text">constructor/destructor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-addConcreteProtocol"><span class="toc-number">1.0.2.3.</span> <span class="toc-text">ext_addConcreteProtocol</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-loadConcreteProtocol"><span class="toc-number">1.0.2.4.</span> <span class="toc-text">ext_loadConcreteProtocol</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-injectSpecialProtocols"><span class="toc-number">1.0.2.5.</span> <span class="toc-text">ext_injectSpecialProtocols</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-injectConcreteProtocol-block作用"><span class="toc-number">1.0.2.6.</span> <span class="toc-text">ext_injectConcreteProtocol (block作用)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">1.0.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol></li></ol>
+		
+		</div>
+		
+		<h1 id="Protocol默认实现"><a href="#Protocol默认实现" class="headerlink" title="Protocol默认实现"></a>Protocol默认实现</h1><p>需求：</p>
+<p>Protocol作为方法声明必须实现后才能才能进行操作处理，有没有办法可以实现协议不用实现就可以有默认值？</p>
+<p>libextobjc 是一个提供语言级别的各种小功能的库。</p>
+<h3 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MyProtocol.h</span><br><span class="line"></span><br><span class="line">@protocol MyProtocol &lt;NSObject&gt;</span><br><span class="line"></span><br><span class="line">@concrete</span><br><span class="line">- (void)testProtocol;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">MyProtocol.m</span><br><span class="line">@concreteprotocol(MyProtocol)</span><br><span class="line"></span><br><span class="line">- (void)testProtocol&#123;</span><br><span class="line">NSLog(@&quot;%s&quot;,__func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>在<code>EXTConcreteProtocol.h</code> 中找到 <code>concreteprotocol</code> <code>concrete</code> 。</p>
+<h5 id="concrete"><a href="#concrete" class="headerlink" title="concrete"></a>concrete</h5><p><code>concrete</code> 其实是对Optional的宏定义。作用1、是使用Optional的特性，声明协议方法，不实现没有⚠️2、是可以直观区分那些协议方法是默认实现的</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#define concrete \</span><br><span class="line">optional</span><br></pre></td></tr></table></figure>
+<h5 id="concreteprotocol"><a href="#concreteprotocol" class="headerlink" title="concreteprotocol"></a>concreteprotocol</h5><p><code>concreteprotocol</code> 传入Protocol的名称，和ProtocolMethodContainer拼接成一个类名,创建一个类去包含用在<code>Protocol</code> 中所有方法</p>
+<p>宏定义内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#define concreteprotocol(NAME) \</span><br><span class="line">interface NAME ## _ProtocolMethodContainer : NSObject &lt; NAME &gt; &#123;&#125; \</span><br><span class="line">@end \</span><br><span class="line">@implementation NAME ## _ProtocolMethodContainer \</span><br><span class="line">+ (void)load &#123; \</span><br><span class="line">if (!ext_addConcreteProtocol(objc_getProtocol(metamacro_stringify(NAME)), self)) \</span><br><span class="line">fprintf(stderr, &quot;ERROR: Could not load concrete protocol %s\n&quot;, metamacro_stringify(NAME)); \</span><br><span class="line">&#125; \</span><br><span class="line">__attribute__((constructor)) \</span><br><span class="line">static void ext_ ## NAME ## _inject (void) &#123; \</span><br><span class="line">ext_loadConcreteProtocol(objc_getProtocol(metamacro_stringify(NAME))); \</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>传入NAME翻译如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@interface MyProtocol_ProtocolMethodContainer : NSObject &lt;MyProtocol&gt; &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@implementation MyProtocol_ProtocolMethodContainer</span><br><span class="line"></span><br><span class="line">+ (void)load &#123;</span><br><span class="line">ext_addConcreteProtocol(objc_getProtocol”MyProtocol”,self);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">__attribute__((constructor))</span><br><span class="line">Static void ext_MyProtocol_inject (void) &#123;</span><br><span class="line">ext_loadConcreteProtocol(ojbc_getProtocol(&quot;MyProtocol&quot;));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)testProtocol&#123;</span><br><span class="line">NSLog(@&quot;%s&quot;,__func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><h4 id="attribute-constructor"><a href="#attribute-constructor" class="headerlink" title="attribute((constructor))"></a><strong>attribute</strong>((constructor))</h4><p><code>__attribute__</code> 􏰊􏰋􏱋􏰚􏰛􏰱􏱶􏱷是一套编译器指令，被GNU和LLVM所支持，允许对<strong>attribute</strong>增加一些参数，做一些高级检查和优化。</p>
+<p><code>__attribute__</code> 用法是，在后面加两个括号，然后写属性列表，属性列表以逗号分隔。</p>
+<p><code>__attribute__((attribute1,attribute2))</code>;</p>
+<h4 id="constructor-destructor"><a href="#constructor-destructor" class="headerlink" title="constructor/destructor"></a>constructor/destructor</h4><p><code>constructor</code> 属性表示在main函数执行之前，执行一些操作。<code>destructor</code> 表示在main函数执行之后做一些操作。<code>constructor</code>执行实际是在所有<code>load</code> 方法都执行完之后，才执行所有<code>constructor</code> 属性修饰的函数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">__attribute__((constructor)) static void beforeMain()&#123;</span><br><span class="line">NSLog(@&quot;brforeMian&quot;);</span><br><span class="line">&#125;</span><br><span class="line">__attribute__((destructor)) static void afterMain()&#123;</span><br><span class="line">NSLog(@&quot;afterMian&quot;);</span><br><span class="line">&#125;</span><br><span class="line">int main(int argc, char * argv[]) &#123;</span><br><span class="line">@autoreleasepool &#123;</span><br><span class="line">NSLog(@&quot;Mian&quot;);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有关<code>constructor</code> 的更多用法请参考<a href="https://github.com/DeveloperErenLiu/RuntimePDF" target="_blank" rel="noopener">RuntimePDF</a>，其中还有多个<code>constructor</code> 设置优先级的用法</p>
+<h4 id="ext-addConcreteProtocol"><a href="#ext-addConcreteProtocol" class="headerlink" title="ext_addConcreteProtocol"></a>ext_addConcreteProtocol</h4><p>添加待处理的Protocol</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">BOOL ext_addConcreteProtocol (Protocol *protocol, Class containerClass) &#123;</span><br><span class="line"></span><br><span class="line">return ext_loadSpecialProtocol(protocol, ^(Class destinationClass)&#123;</span><br><span class="line"></span><br><span class="line">ext_injectConcreteProtocol(protocol, containerClass, destinationClass);</span><br><span class="line"></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Protocol:默认实现的Protocol</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">BOOL ext_loadSpecialProtocol (Protocol *protocol, void (^injectionBehavior)(Class destinationClass)) &#123;</span><br><span class="line">// 默认实现的 protocol 个数是否大于 SIZE_MAX</span><br><span class="line">// specialProtocolCount 默认实现的 protocol 的计数</span><br><span class="line">if (specialProtocolCount == SIZE_MAX) &#123;</span><br><span class="line">return NO;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// specialProtocolCapacity 为数组总容量</span><br><span class="line">if (specialProtocolCount &gt;= specialProtocolCapacity) &#123;</span><br><span class="line">// 如果未超过 SIZE_MAX 则进行动态扩容</span><br><span class="line">// 将动态扩容后的数组头指针交给 specialProtocols</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 将参数的 block copy 到堆，并赋值给 copiedBlock</span><br><span class="line">ext_specialProtocolInjectionBlock copiedBlock = [injectionBehavior copy];</span><br><span class="line"></span><br><span class="line">// 将 protocol, block, 和 NO 组装成 struct</span><br><span class="line">// 然后将 struct 追加到数组中</span><br><span class="line">specialProtocols[specialProtocolCount] = (EXTSpecialProtocol)&#123;</span><br><span class="line">.protocol = protocol,</span><br><span class="line">.injectionBlock = (__bridge_retained void *)copiedBlock,</span><br><span class="line">.ready = NO</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 默认实现 protocol 的个数自增</span><br><span class="line">++specialProtocolCount;</span><br><span class="line"></span><br><span class="line">// success!</span><br><span class="line">return YES;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>整个函数走下来，作用就是将 {protocol, block} 追加到数组中。</p>
+<h4 id="ext-loadConcreteProtocol"><a href="#ext-loadConcreteProtocol" class="headerlink" title="ext_loadConcreteProtocol"></a>ext_loadConcreteProtocol</h4><p>方法注入</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void ext_loadConcreteProtocol (Protocol *protocol) &#123;</span><br><span class="line"></span><br><span class="line">ext_specialProtocolReadyForInjection(protocol);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>确保 +load 中加入数组的所有 protocol 都能找到：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void ext_specialProtocolReadyForInjection (Protocol *protocol) &#123;</span><br><span class="line">// 循环遍历数组</span><br><span class="line">for (size_t i = 0;i &lt; specialProtocolCount;++i) &#123;</span><br><span class="line">// 如果数组的 protocol 是当前 protocl</span><br><span class="line">if (specialProtocols[i].protocol == protocol) &#123;</span><br><span class="line">// 并且这个 protocol 还未被遍历过(也就是 ready 标识)</span><br><span class="line">if (!specialProtocols[i].ready) &#123;</span><br><span class="line">// 则进行标记</span><br><span class="line">specialProtocols[i].ready = YES;</span><br><span class="line">// ready 标识计数自增</span><br><span class="line">// !!! 当所有的 protocol 均 ready 之后</span><br><span class="line">// 再调用 ext_injectSpecialProtocols</span><br><span class="line">if (++specialProtocolsReady == specialProtocolCount)</span><br><span class="line">ext_injectSpecialProtocols();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">break;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>+load 与 <code>__attribute__((constructor))</code> 的优先级能使得所有 protocol 加入完成以后，再进行处理。<br>ready 计数 specialProtocolsReady 使得所有默认实现均判断无误后，再进行注入。</p>
+<h4 id="ext-injectSpecialProtocols"><a href="#ext-injectSpecialProtocols" class="headerlink" title="ext_injectSpecialProtocols"></a>ext_injectSpecialProtocols</h4><p>优先级问题：如果 protocolA <protocolb>，也就是 protocolA 遵循 protocolB，那么谁的优先级更高呢？除此之外，如果遵循 protocol 的 class，自己也实现了默认方法呢？</protocolb></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">static void ext_injectSpecialProtocols (void) &#123;</span><br><span class="line"></span><br><span class="line">qsort_b(specialProtocols, specialProtocolCount, sizeof(EXTSpecialProtocol), ^(const void *a, const void *b)&#123;</span><br><span class="line">// 根据 a 是否 comform b，对整个数组进行排序 (protocol_conformsToProtocol)</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 通过 objc_getClassList 获得所有类列表</span><br><span class="line"></span><br><span class="line">// 两个 for 循环嵌套</span><br><span class="line">// 对类列表以及 protocol 列表进行遍历</span><br><span class="line">// 如果 class comform protocol</span><br><span class="line">// 则调用之前 struct 中的注入 block，进行注入</span><br><span class="line">for (size_t i = 0;i &lt; specialProtocolCount;++i) &#123;</span><br><span class="line">Protocol *protocol = specialProtocols[i].protocol;</span><br><span class="line"></span><br><span class="line">for (unsigned classIndex = 0;classIndex &lt; classCount;++classIndex) &#123;</span><br><span class="line">Class class = allClasses[classIndex];</span><br><span class="line"></span><br><span class="line">if (!class_conformsToProtocol(class, protocol))</span><br><span class="line">continue;</span><br><span class="line"></span><br><span class="line">// 遵循 protocol 的 class 即为注入的目标 class</span><br><span class="line">injectionBlock(class);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以，整个方法的任务也很清晰：</p>
+<p>对 protocol 进行优先级排序，给出具体注入的先后顺序，防止方法覆盖或无法注入。</p>
+<p>获取全部 class 列表。</p>
+<p>两层循环遍历，将 class 与其遵循的 protocol 进行匹配。</p>
+<p>调用 struct 中的 block，并将目标 class 传出，进行注入。</p>
+<h4 id="ext-injectConcreteProtocol-block作用"><a href="#ext-injectConcreteProtocol-block作用" class="headerlink" title="ext_injectConcreteProtocol (block作用)"></a>ext_injectConcreteProtocol (block作用)</h4><p>block 是在 +load 中就已经赋值了，而 block 的实现，就是直接调用了 ext_injectConcreteProtocol 函数：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 函数有三个参数</span><br><span class="line">// protocol</span><br><span class="line">// containerClass: 实现了 protocol 方法的 容器类</span><br><span class="line">// class: 两层循环嵌套中，找到的要注入的目标 class</span><br><span class="line">static void ext_injectConcreteProtocol (Protocol *protocol, Class containerClass, Class class) &#123;</span><br><span class="line"></span><br><span class="line">// 获取 容器类 中的实例方法列表</span><br><span class="line">// 获取 容器类 meta class 中的类方法列表</span><br><span class="line"></span><br><span class="line">// 循环注入实例方法</span><br><span class="line">for (unsigned methodIndex = 0;methodIndex &lt; imethodCount;++methodIndex) &#123;</span><br><span class="line">// 获取方法 SEL</span><br><span class="line">// 获取方法 IMP</span><br><span class="line">// 判断 目标类 是否存在该方法</span><br><span class="line">// 进行注入</span><br><span class="line">&#125;</span><br><span class="line">// 循环注入类方法同理</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><ol>
+<li><p>注入实现思路的重点在于，使用宏为 protocol 扩展了一个容器类。<br>容器类中，利用 +load 与 <strong>attribute</strong>((constructor)) 的特性，将注入流程分为了两个部分。</p>
+</li>
+<li><p>在 +load 中，将 protocol，执行注入的 block 打包成 struct，然后将 struct 装进数组。</p>
+</li>
+<li><p>当执行到 <strong>attribute</strong>((constructor)) 时，也就表示所有类的 +load 都已经执行过了，再对数组进行优先级排序。</p>
+</li>
+<li><p>排序完成后，两层循环嵌套，查找遵循了 protocol 的 class。<br>调用 block 执行注入。</p>
+</li>
+</ol>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/OC/">OC</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/Protocol/">Protocol</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	<div class="share-jiathis">
+	  
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+    var jiathis_config={
+    data_track_clickback:true,
+    sm:"copy,renren,cqq",
+    pic:"",
+    summary:"",
+    
+  </script> 
+<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=
+" charset="utf-8"></script>      
+
+	 </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2018/05/10/protocol属性-category属性-覆盖属性/"  title="protocol属性 category属性 覆盖属性">
+ <strong>下一篇：</strong><br/> 
+ <span>protocol属性 category属性 覆盖属性
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+<section id="comments" class="comment">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Protocol默认实现"><span class="toc-number">1.</span> <span class="toc-text">Protocol默认实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#用法"><span class="toc-number">1.0.1.</span> <span class="toc-text">用法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#concrete"><span class="toc-number">1.0.1.0.1.</span> <span class="toc-text">concrete</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#concreteprotocol"><span class="toc-number">1.0.1.0.2.</span> <span class="toc-text">concreteprotocol</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分析"><span class="toc-number">1.0.2.</span> <span class="toc-text">分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#attribute-constructor"><span class="toc-number">1.0.2.1.</span> <span class="toc-text">attribute((constructor))</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#constructor-destructor"><span class="toc-number">1.0.2.2.</span> <span class="toc-text">constructor/destructor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-addConcreteProtocol"><span class="toc-number">1.0.2.3.</span> <span class="toc-text">ext_addConcreteProtocol</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-loadConcreteProtocol"><span class="toc-number">1.0.2.4.</span> <span class="toc-text">ext_loadConcreteProtocol</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-injectSpecialProtocols"><span class="toc-number">1.0.2.5.</span> <span class="toc-text">ext_injectSpecialProtocols</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ext-injectConcreteProtocol-block作用"><span class="toc-number">1.0.2.6.</span> <span class="toc-text">ext_injectConcreteProtocol (block作用)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">1.0.3.</span> <span class="toc-text">小结</span></a></li></ol></li></ol></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/C语言/" title="C语言">C语言<sup>1</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/Hexo博客/" title="Hexo博客">Hexo博客<sup>5</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/OC/" title="OC">OC<sup>6</sup></a></li>
+		  
+		
+		  
+			<li><a href="/categories/ReactiveCocoa/" title="ReactiveCocoa">ReactiveCocoa<sup>1</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/property/" title="property">property<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/SSH/" title="SSH">SSH<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/ReactiveCocoa/" title="ReactiveCocoa">ReactiveCocoa<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Markdown/" title="Markdown">Markdown<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bridge/" title="bridge">bridge<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bridge-transfer/" title="bridge_transfer">bridge_transfer<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Struct/" title="Struct">Struct<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/protocol属性/" title="protocol属性">protocol属性<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/category属性/" title="category属性">category属性<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Protocol/" title="Protocol">Protocol<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Instance-ivars/" title="Instance ivars">Instance ivars<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/成员变量/" title="成员变量">成员变量<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/synthesize/" title="synthesize">synthesize<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/dynamic/" title="dynamic">dynamic<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+        
+          <li>
+            
+            	<a href="https://github.com/Zomfice" target="_blank" title="GitHub">GitHub</a>
+            
+          </li>
+        
+          <li>
+            
+            	<a href="https://zomfice.github.io/" target="_blank" title="Zomfice&#39;s Blog">Zomfice&#39;s Blog</a>
+            
+          </li>
+        
+    </ul>
+</div>
+
+  
+
+
+  <div class="rsspart">
+	<a href="/atom.xml  https://zomfice.github.io/" target="_blank" title="rss">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+
+<!--隐藏footer
+
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hello ,I&#39;m Larry Page in Google. <br/>
+			This is my blog,believe it or not.</p>
+	</section>
+	 
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+-->
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2019 
+		
+		<a href="/about" target="_blank" title="Zomfice">Zomfice</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+
+
+
+<script type="text/javascript">
+
+var disqus_shortname = 'https-zomfice-github-io';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
