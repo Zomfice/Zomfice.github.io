@@ -97,7 +97,7 @@ NSLog(@"%s",__func__);
 
 #### __attribute__((constructor))
 
-`__attribute__` 􏰊􏰋􏱋􏰚􏰛􏰱􏱶􏱷是一套编译器指令，被GNU和LLVM所支持，允许对__attribute__增加一些参数，做一些高级检查和优化。
+`__attribute__`􏰊􏰋􏱋􏰚􏰛􏰱􏱶􏱷是一套编译器指令，被GNU和LLVM所支持，允许对__attribute__增加一些参数，做一些高级检查和优化。
 
 `__attribute__` 用法是，在后面加两个括号，然后写属性列表，属性列表以逗号分隔。
 
